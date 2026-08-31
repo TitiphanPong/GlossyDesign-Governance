@@ -2,7 +2,7 @@
 
 ADR-lite decision log for durable product and technical choices. Temporary tasks belong in `TODO.md`, not here.
 
-Last reviewed: 2026-08-30 (Asia/Bangkok)
+Last reviewed: 2026-09-01 (Asia/Bangkok)
 
 ## Active decisions
 
@@ -203,6 +203,24 @@ Owner decision:
 
 Impact:
 P1-13 is actionable. The implementation must be deterministic, retry/concurrency safe, multi-job aware, and preserve existing tracking privacy/token contracts.
+
+### DEC-015 — Scheduled automation uses separate bootstrap, continuation, scanner, and scout boundaries
+
+Status: Active
+Date: 2026-09-01
+
+Owner decision:
+- ChatGPT Scheduled Tasks are the recurring bootstrap layer for Glossy automation: TODO Runner hourly, Project Scanner every 6 hours, and Feature Scout once per Bangkok calendar day;
+- every recurring bootstrap checks for an overlapping active durable goal before starting work and must no-op rather than create a competing worker;
+- unfinished lnwjud durable work continues through `lnwjud-scheduled-continuation` using exactly one confirmed one-time cloud successor; recurring bootstrap schedules do not replace that continuation;
+- Windows Task Scheduler, cron, shell timers, or a second local recurring agent queue are not used for these workflows;
+- Project Scanner remains a technical Planner under DEC-009 and may produce source-verified technical backlog evidence according to its collision rules;
+- Feature Scout is a Product/Opportunity Planner only: it may rank `READY_FOR_DISCUSSION`, `NEEDS_DECISION`, `DEPENDENCY_GATED`, `DEFER`, and `DUPLICATE` candidates, but it must not directly promote product ideas into executable `OPEN` TODOs;
+- explicit owner/Planner approval is required before a Feature Scout candidate becomes executable backlog work;
+- `NO_ACTIONABLE_TASK`, no new verified scanner finding, or no materially new scout opportunity are healthy outcomes and must not cause agents to manufacture work.
+
+Impact:
+The automation loop may run continuously without merging Planner and Implementer authority. Recovery of unfinished work is handled by one-time cloud continuation, while recurring schedules only bootstrap independent cycles and collision-check first.
 
 ## Needs Decision
 

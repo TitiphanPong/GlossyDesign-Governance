@@ -1,7 +1,7 @@
 # GlossyDesign Project Rules
 
 Version: Governance V2  
-Last reviewed: 2026-08-30 (Asia/Bangkok)
+Last reviewed: 2026-09-01 (Asia/Bangkok)
 
 ## 1. Stack and repository boundaries
 
@@ -131,6 +131,27 @@ The Project Scanner is a read-only Planner against Frontend/Backend application 
 - Product/business-policy ambiguity is routed to Needs Decision / `BLOCKED`; Scanner does not invent behavior.
 - Scanner never edits FE/BE application source, commits implementation code, merges branches, resets/cleans user WIP, or performs destructive actions.
 - If an implementation durable goal is active, Scanner may inspect but must write findings only to its report/state files; do not concurrently mutate `TODO.md` or `DECISIONS.md`. Reconcile pending findings when the implementation runner is idle.
+
+### Automated Feature Scout policy
+
+The Feature Scout is a read-only Product/Opportunity Planner and is separate from both the technical Project Scanner and the implementation TODO Runner.
+
+- Run once per Bangkok calendar day after the first daily Project Scanner window.
+- Ground every opportunity in current source/capabilities, active TODO/DECISIONS, scanner evidence, and current durable-goal/WIP state.
+- Use a change guard: if Frontend SHA, Backend SHA, TODO/DECISIONS, and meaningful scanner evidence are unchanged from the prior scout, keep the run lightweight and report no materially new opportunity rather than manufacturing candidates.
+- Rank only a small differentiated set by business value, user frequency, readiness, complexity, risk, and dependencies.
+- Deduplicate against active TODOs/decisions and classify candidates only as `READY_FOR_DISCUSSION`, `NEEDS_DECISION`, `DEPENDENCY_GATED`, `DEFER`, or `DUPLICATE`.
+- Feature Scout must never edit Frontend/Backend application source, create implementation branches/commits, or directly promote a feature candidate into an executable `OPEN` TODO.
+- Product-feature promotion into `TODO.md` requires explicit owner/Planner approval and a bounded implementation specification. Technical scanner findings remain governed separately by DEC-009.
+- Keep the latest concise scout evidence under `docs/reports/feature-scout-latest.md` when useful.
+
+### Scheduled automation orchestration
+
+- ChatGPT Scheduled Tasks are the recurring bootstrap layer for the TODO Runner, Project Scanner, and Feature Scout.
+- A recurring bootstrap must first check for an overlapping active durable goal and return a no-op rather than creating a competing worker.
+- An unfinished durable lnwjud goal uses `lnwjud-scheduled-continuation` with exactly one confirmed one-time cloud successor for cross-turn recovery. Recurring bootstrap tasks are not substitutes for the active goal's continuation.
+- Do not use Windows Task Scheduler, cron, shell timers, or another local recurring execution queue for these agent workflows.
+- `NO_ACTIONABLE_TASK`, no new scanner finding, and no new scout opportunity are healthy terminal outcomes; automated workers must not invent work solely to keep the loop busy.
 
 ### Never
 
