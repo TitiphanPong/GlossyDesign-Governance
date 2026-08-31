@@ -1444,19 +1444,27 @@ Focused new E2E suite plus Backend unit, E2E, ESLint, build, and relevant isolat
 
 ### P3-13 — Isolate Playwright browser tests from an active developer Next server
 
-Status: OPEN  
+Status: DONE
 Area: Frontend / Test infrastructure / Reliability
 
+Completion evidence (2026-09-01):
+- Frontend Playwright now uses a dedicated `.next-e2e` runtime/output directory through `NEXT_DIST_DIR`, isolated from the normal developer Next runtime, and the generated E2E artifacts are excluded from Git.
+- The harness keeps a deterministic dedicated E2E origin, does not enable `reuseExistingServer`, and preserves controlled authentication/PromptPay/production fixtures rather than borrowing an arbitrary user server.
+- The isolated browser path was documented and the full Chromium suite passed 10/10 without terminating or restarting the user-owned developer server. Earlier goal verification and the recovered run both completed without the prior shared Next lock collision.
+- Feature commit `67cb03a` was pushed during implementation; the verified change was integrated onto Frontend `main` as `6ce9f36` and pushed to `origin/main`.
+- Recovered-goal verification on current Frontend `main` passed: Node tests 195/195, browser E2E 10/10, ESLint with zero warnings, UTF-8 validation, production build/TypeScript, and `git diff --check`.
+- The unrelated local `.agents/` skill content remains untracked and preserved; no user-owned process or unrelated WIP was reset, cleaned, or discarded.
+
 Fresh-scan evidence (2026-09-01):
-- `npm run test:e2e:browser` failed during two consecutive full-project scans because Playwright's configured `webServer` starts another Next development server from the same project while a user-owned dev server is already active.
+- `npm run test:e2e:browser` failed during two consecutive full-project scans because Playwright's configured `webServer` started another Next development server from the same project while a user-owned dev server was already active.
 - The 2026-09-01 failure reported `Another next dev server is already running` for PID 23588. Scanner correctly did not kill the developer process.
-- Unit tests, ESLint, UTF-8, and production build pass, so this is a browser-test isolation problem rather than an application build failure.
+- Unit tests, ESLint, UTF-8, and production build were already passing, confirming this was a browser-test isolation problem rather than an application build failure.
 
 Acceptance:
-- Browser E2E can run while the normal developer Next server for this repository remains active, without killing/restarting the developer process and without sharing a conflicting Next runtime lock/output directory.
-- Preserve a deterministic dedicated E2E origin and fail safely if the isolated E2E server itself cannot start.
-- Keep authentication/test fixtures compatible and ensure the harness does not accidentally reuse an unrelated existing server.
-- Add/document the isolated execution path and verify the browser suite succeeds with a normal dev server simultaneously running.
+- [x] Browser E2E can run while the normal developer Next server for this repository remains active, without killing/restarting the developer process and without sharing a conflicting Next runtime lock/output directory.
+- [x] Preserve a deterministic dedicated E2E origin and fail safely if the isolated E2E server itself cannot start.
+- [x] Keep authentication/test fixtures compatible and ensure the harness does not accidentally reuse an unrelated existing server.
+- [x] Add/document the isolated execution path and verify the browser suite succeeds with a normal dev server simultaneously running.
 
 Do not touch:
 Do not terminate user-owned processes, change production runtime behavior, or solve the issue by setting `reuseExistingServer: true` against an unverified arbitrary development server.
