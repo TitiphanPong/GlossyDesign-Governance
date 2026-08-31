@@ -15,6 +15,14 @@ This file defines how Codex and other implementation agents work on GlossyDesign
 
 The Frontend and Backend are separate Git repositories. The workspace root is currently not a Git repository.
 
+## Governance location rule
+
+- The six governance files at the workspace root are the active runtime/working copies and are the only copies agents should read for normal planning and execution.
+- `GlossyDesign-Governance/` is the dedicated Git-versioned mirror of those six files, not a second runtime source of truth.
+- Never choose between root and mirror copies by filesystem modified time. Content ownership is directional: edit the workspace-root copy first, then sync the same content into `GlossyDesign-Governance/` and version it there.
+- If the root and mirror differ, treat the workspace-root copy as the active state, report governance drift, reconcile root → mirror, and do not run work from mixed copies.
+- Do not edit the mirror first unless the explicit task is a recovery operation that has verified the intended canonical state.
+
 ## Source-of-truth order
 
 1. Current checked-out source code tells you what the application actually does now.
