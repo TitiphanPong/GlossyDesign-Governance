@@ -1414,8 +1414,16 @@ Focused Customer/Order tests, full affected repository tests, ESLint, TypeScript
 
 ### P3-12 — Add cross-domain E2E coverage for BOM material consumption
 
-Status: OPEN  
+Status: DONE
 Area: Backend / Production / Inventory / Catalog / Regression safety
+
+Completion evidence (2026-09-01):
+- Added `test/production-bom.e2e-spec.ts`, an authenticated HTTP-contract E2E backed by `MongoMemoryReplSet` and the real Inventory, Product, Orders, and Production modules/persistence boundary.
+- Success path creates real stock/catalog/order/job state, transitions `file_check → queued → producing`, asserts exact BOM delta (20 → 14 for recipe 2 sheets × quantity 3), one append-only `issue` movement, Order/Production Job references, and full recipe snapshot provenance. Replaying the same `producing` transition remains idempotent and does not consume twice.
+- Fail-closed path starts with insufficient stock (5 < required 6), receives 409, leaves on-hand unchanged, records no issue movement, and leaves the Production Job queued.
+- The persisted E2E exposed a real boundary bug hidden by plain-object unit mocks: spreading a Mongoose Order cart subdocument dropped `qty`, causing an invalid material quantity. Production now preserves the original subdocument while narrowing the already-validated `productId` type; BOM policy and authority are unchanged.
+- Added reproducible `npm run test:mongo:bom`. Verification passed: focused Mongo BOM 2/2, Backend unit 211 passed / 15 skipped, standard E2E 37/37 (Mongo suite intentionally skipped there), ESLint, build, and `git diff --check`.
+- Backend feature commit `85a565f` was pushed, fast-forward merged, and pushed to `main`.
 
 Fresh-scan evidence (2026-09-01):
 - P2-30 has strong service/unit coverage around recipes, `materialIssueStartedAt`, idempotency, insufficient stock, and movement provenance.
