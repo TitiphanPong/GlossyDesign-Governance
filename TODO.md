@@ -1,7 +1,7 @@
 # GlossyDesign TODO
 
 Governance: V2  
-Last reviewed: 2026-08-31 (Asia/Bangkok)  
+Last reviewed: 2026-09-01 (Asia/Bangkok)  
 Frontend baseline: `2d36e586f50eb2aa12cf43978727cc989b1a2834`  
 Backend baseline: `94a82b8178014b0f55696c3545e978d52556b4a7`
 
@@ -1379,3 +1379,71 @@ Progress (2026-08-30):
 
 Acceptance:
 Customer CRM and Customer Display have unambiguous route/menu naming; legacy display links remain compatible; feature detail drawers reuse the canonical Order-style shell with responsive behavior and regression coverage; business-specific drawer content remains owned by each feature.
+
+### P3-11 — Make Customer Order history fully pageable by Customer identity
+
+Status: OPEN  
+Area: Frontend + Backend / Customers / Orders / Data access
+
+Fresh-scan evidence (2026-09-01):
+- `CustomersService.findOne()` still returns only the latest 100 Orders via `.limit(100)` even though `orderCount` and financial summaries can represent a larger lifetime history.
+- Customer detail UI further renders only `customer.orders.slice(0, 10)`, so staff cannot reach older sales from the Customer workflow.
+- The generic Orders list query currently has no exact `customerId` filter, so there is no alternative identity-safe drill-down to the complete Customer history.
+- This is not a duplicate of P2-34: P2-34 fixed related Production/Upload correctness beyond the first 100 Orders and intentionally allowed the recent Order-history list to remain bounded or become paginated later.
+
+Acceptance:
+- Provide an authenticated server-paginated Customer Order-history contract keyed by canonical Customer identity; do not rely on name/phone fuzzy matching.
+- Customer detail can page through the complete history while keeping the initial payload bounded and responsive.
+- Counts, ordering, and pagination metadata represent the full matching history and remain stable under deterministic newest-first ordering.
+- Existing historical Order snapshots remain immutable and financial truth stays on Orders/payment facts.
+- Add Backend pagination/authorization regression coverage and Frontend query/state coverage; preserve walk-in Orders without a Customer relation.
+
+Do not touch:
+Do not auto-merge Customers, rewrite historical Order customer snapshots, or broaden any Customer endpoint to public access.
+
+Verification:
+Focused Customer/Order tests, full affected repository tests, ESLint, TypeScript/build, UTF-8 for Frontend, and FE↔BE contract review.
+
+### P3-12 — Add cross-domain E2E coverage for BOM material consumption
+
+Status: OPEN  
+Area: Backend / Production / Inventory / Catalog / Regression safety
+
+Fresh-scan evidence (2026-09-01):
+- P2-30 has strong service/unit coverage around recipes, `materialIssueStartedAt`, idempotency, insufficient stock, and movement provenance.
+- Current Backend E2E suites do not exercise the complete persisted path from an Order/canonical Product recipe through Production Job line mapping and `queued → producing` into the resulting Inventory movement/history.
+- A regression spanning controller/DTO/persistence boundaries could therefore escape the current isolated service tests even though material consumption is an inventory-integrity workflow.
+
+Acceptance:
+- Add an isolated E2E path that creates the minimum real catalog/stock/order/job state needed to trigger approved BOM consumption through public authenticated application contracts.
+- Assert exact stock delta, append-only `issue` movement, Order/Production Job reference, recipe snapshot/provenance, and retry/idempotency behavior.
+- Include at least one fail-closed case such as insufficient stock or incomplete recipe without silently changing stock.
+- Keep accounting/COGS semantics out of scope and do not weaken P2-30 server authority.
+
+Do not touch:
+Do not redesign BOM policy, introduce destructive inventory migration, or substitute mocks for the persistence boundary the test is intended to protect.
+
+Verification:
+Focused new E2E suite plus Backend unit, E2E, ESLint, build, and relevant isolated Mongo/inventory verification when configured.
+
+### P3-13 — Isolate Playwright browser tests from an active developer Next server
+
+Status: OPEN  
+Area: Frontend / Test infrastructure / Reliability
+
+Fresh-scan evidence (2026-09-01):
+- `npm run test:e2e:browser` failed during two consecutive full-project scans because Playwright's configured `webServer` starts another Next development server from the same project while a user-owned dev server is already active.
+- The 2026-09-01 failure reported `Another next dev server is already running` for PID 23588. Scanner correctly did not kill the developer process.
+- Unit tests, ESLint, UTF-8, and production build pass, so this is a browser-test isolation problem rather than an application build failure.
+
+Acceptance:
+- Browser E2E can run while the normal developer Next server for this repository remains active, without killing/restarting the developer process and without sharing a conflicting Next runtime lock/output directory.
+- Preserve a deterministic dedicated E2E origin and fail safely if the isolated E2E server itself cannot start.
+- Keep authentication/test fixtures compatible and ensure the harness does not accidentally reuse an unrelated existing server.
+- Add/document the isolated execution path and verify the browser suite succeeds with a normal dev server simultaneously running.
+
+Do not touch:
+Do not terminate user-owned processes, change production runtime behavior, or solve the issue by setting `reuseExistingServer: true` against an unverified arbitrary development server.
+
+Verification:
+Run the browser E2E suite with the normal developer server left running, plus Frontend tests, ESLint, UTF-8, production build, and `git diff --check`.
