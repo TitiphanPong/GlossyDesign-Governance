@@ -1382,8 +1382,16 @@ Customer CRM and Customer Display have unambiguous route/menu naming; legacy dis
 
 ### P3-11 — Make Customer Order history fully pageable by Customer identity
 
-Status: OPEN  
+Status: DONE
 Area: Frontend + Backend / Customers / Orders / Data access
+
+Completion evidence (2026-09-01):
+- Customer detail now accepts validated `orderPage` / `orderLimit` parameters and pages Orders strictly by canonical `customerId`, with deterministic `{ createdAt: -1, _id: -1 }` ordering and bounded default page size 10.
+- Response includes `orderPagination { page, limit, total }`; lifetime `summary.orderCount` remains authoritative for the matching Customer history, while related Production/Upload aggregation still scans the full Customer Order set.
+- Customer drawer now renders the server page and exposes `TablePagination`; Frontend request/state wiring reloads only the selected Customer identity and preserves walk-in Orders with no Customer relation.
+- Authorization regression confirms anonymous Customer detail remains 401 while authenticated staff may request paged history.
+- Verification passed: Backend focused CustomersService 5/5, focused Customers E2E 2/2, full unit 211 passed / 15 skipped, full E2E 37/37, ESLint, build; Frontend focused customer tests 4/4, full tests 195/195, ESLint, UTF-8, and production build. Clean Frontend branch was re-verified after separating unrelated layout/icon WIP.
+- Backend feature commit `2f9996f` and Frontend clean feature commit `964df4b` were pushed, fast-forward merged, and pushed to each repository `main`. Unrelated Frontend commit `9587eba` (`แก้ layout icon`) was preserved separately on local branch `wip/preserve-layout-icon-20260901` and was not merged with P3-11.
 
 Fresh-scan evidence (2026-09-01):
 - `CustomersService.findOne()` still returns only the latest 100 Orders via `.limit(100)` even though `orderCount` and financial summaries can represent a larger lifetime history.
