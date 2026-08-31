@@ -2,8 +2,8 @@
 
 Governance: V2  
 Last verified: 2026-08-31 (Asia/Bangkok)  
-Frontend main: `d04012ae8c76b63df56fb97187c9b5122a80adf9`  
-Backend main: `d8ecdf1c9b2c41f779854f4daa0781944d8ed7ea`
+Frontend main: `2d36e586f50eb2aa12cf43978727cc989b1a2834`  
+Backend main: `94a82b8178014b0f55696c3545e978d52556b4a7`
 
 This document is a source snapshot, not a target plan. `TODO.md` is the sole active execution backlog and `DECISIONS.md` owns durable product/architecture decisions.
 
@@ -130,13 +130,14 @@ Customers:
 - Customer detail derives order/outstanding/job/upload context from authoritative server queries.
 
 Production:
-- Backend owns Production Jobs with list/detail/create/update/stage APIs.
-- Stage transitions are server-owned and audited.
-- Current backlog still contains product-level improvements such as full creation UX, pagination/search completeness and public tracking aggregation decisions.
+- Backend owns Production Jobs with list/detail/create/update/stage APIs; Frontend exposes executable creation, operational filtering, Job detail, and stage progression.
+- Stage transitions are server-owned and audited. Order-line ownership may be explicit through `orderLineIndexes` when one Order is split across multiple Production Jobs.
+- Entering `producing` is the material-consumption boundary: the Job locks its material-issue plan before the first movement, resolves Product/Variant recipes, and issues Inventory idempotently. Public Tracking readiness aggregation follows DEC-014 while final delivery remains an explicit Order-level handoff.
 
 Inventory:
 - Stock items and append-only movements are separate from Product/Variant catalog identity.
-- BOM/material-recipe auto-consumption is intentionally deferred to P2-30 now that DEC-011 established canonical Product/Variant ownership.
+- Product/Variant recipes reference canonical Stock Items with explicit unit conversion where required. Automatic Production issues retain immutable Order/Job and recipe-snapshot provenance; retry keys prevent double consumption.
+- Manual `waste` remains a distinct privileged movement fact rather than being folded into automatic recipe consumption.
 
 ## 8. Upload and customer-display architecture
 

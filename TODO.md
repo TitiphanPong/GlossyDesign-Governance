@@ -1,9 +1,9 @@
 # GlossyDesign TODO
 
 Governance: V2  
-Last reviewed: 2026-08-30 (Asia/Bangkok)  
-Frontend baseline: `99445b468e33182bd57901a4e7649f9d9ad9bc23`  
-Backend baseline: `f4edb8d4dbf74252daa4a5ad50c591412795a1b9`
+Last reviewed: 2026-08-31 (Asia/Bangkok)  
+Frontend baseline: `2d36e586f50eb2aa12cf43978727cc989b1a2834`  
+Backend baseline: `94a82b8178014b0f55696c3545e978d52556b4a7`
 
 This is the only active execution backlog for Governance V2. Archived audits/plans are historical evidence only.
 
@@ -946,21 +946,27 @@ Acceptance:
 
 ### P2-30 — Add material recipes/BOM and auditable job stock consumption
 
-Status: OPEN  
+Status: DONE  
 Area: Frontend + Backend / Catalog / Inventory / Production
 
 Dependencies resolved by DEC-011 (2026-08-31):
 P2-27 Production Job exists and Product/Variant is now the approved canonical catalog owner for material recipes. Quick Seller presentation may map into that canonical identity while custom/ad-hoc lines remain explicit exceptions. Do not attach BOM truth to transient presentation names or silently guess recipes for custom work.
 
-Product design:
-Canonical sellable Product/Variant identities may define a material recipe such as paper sheets, sticker media length/area, board, lamination, ink/finishing allowance, etc. Production execution should turn that recipe into explicit Inventory movement facts linked to the Job/Order.
+Progress (2026-08-31):
+- Canonical Product and Variant records now own optional material recipes containing `stockItemId`, positive recipe quantity/unit, and an explicit `conversionFactor` whenever the recipe unit differs from the active Stock Item unit. Recipe writes validate active Stock Item identity and never infer missing conversions.
+- Production Jobs may carry explicit `orderLineIndexes`; sibling Jobs cannot claim the same mapped Order line, and the mapping becomes immutable once material issue starts. `materialIssueStartedAt` locks the plan before the first stock movement so a partial failure/retry cannot silently change the authoritative recipe/order-line scope; legacy single-Job records without the new field remain supported.
+- The server issues recipe material exactly at `queued → producing`, aggregates consumption by Stock Item, and records append-only Inventory `issue` movements linked to the Production Job and Order. Stable global idempotency keys are scoped to `productionJobId + stockItemId`, while ordinary manual movement keys remain actor-bound.
+- Each automatic movement stores immutable Order/Job provenance plus a `recipeSnapshot` of the Product/Variant source, line quantity, recipe quantity/unit, conversion factor, stock unit, and issued quantity. Missing products/variants/recipes, inactive stock, invalid units, and insufficient stock fail visibly rather than guessing or rewriting history.
+- `waste` is a separate movement fact and remains Manager/Admin-only for manual entry. Cost/COGS semantics were intentionally not introduced.
+- Frontend `main` already contains the P2-30 execution surfaces for selecting Production Job Order lines, showing BOM/material-issued state, recipe contract normalization, and manual waste selection (introduced in commit `8065002` and verified on current Frontend `main` `2d36e58`). No additional Frontend source mutation was required in this final integration pass.
+- Backend feature commit `94a82b8` was pushed on `feature/p2-30-bom`, fast-forward merged to `main`, and pushed to `origin/main` at the same SHA. Pre-merge verification passed 211 unit tests with 15 expected integration skips, E2E 37/37, replica-set Inventory concurrency 3/3, ESLint, production build/TypeScript, `git diff --check`, and `npm audit` with 0 vulnerabilities. Post-merge Backend `main` re-verification passed focused P2-30 tests 27/27, ESLint, and production build.
 
 Acceptance:
-- Recipe/BOM ownership is attached to the approved canonical catalog model/variant, with units compatible with Stock Items and explicit conversion rules where required.
-- Starting/completing the chosen production stage records idempotent append-only `issue` movements linked to Job/Order; retries cannot double-consume material.
-- Missing/incomplete recipes fail visibly and never silently guess consumption. Manager/Admin may perform an audited manual correction rather than rewrite movement history.
-- Waste remains a distinct movement fact with a reason and optional Job reference.
-- Cost/accounting COGS is not inferred unless a separate approved costing policy is introduced.
+- [x] Recipe/BOM ownership is attached to the approved canonical catalog model/variant, with units compatible with Stock Items and explicit conversion rules where required.
+- [x] Starting the chosen production stage records idempotent append-only `issue` movements linked to Job/Order; retries cannot double-consume material.
+- [x] Missing/incomplete recipes fail visibly and never silently guess consumption. Manager/Admin may perform an audited manual correction rather than rewrite movement history.
+- [x] Waste remains a distinct movement fact with a reason and optional Job reference.
+- [x] Cost/accounting COGS is not inferred unless a separate approved costing policy is introduced.
 
 ### P2-31 — Add cashier shift opening/closing and cash reconciliation
 
