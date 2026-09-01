@@ -222,6 +222,51 @@ Owner decision:
 Impact:
 The automation loop may run continuously without merging Planner and Implementer authority. Recovery of unfinished work is handled by one-time cloud continuation, while recurring schedules only bootstrap independent cycles and collision-check first.
 
+### DEC-016 — Cashier shift opening/closing and drawer reconciliation are out of scope
+
+Status: Active
+Date: 2026-09-01
+
+Owner decision:
+- do not implement cashier shift opening/closing, opening float, drawer cash-in/out, closing cash count, or shift discrepancy reconciliation at this time;
+- do not add a Shift model, API, menu, migration, or new financial projection merely because the capability is common in POS products;
+- existing Order/payment/refund facts remain the authoritative financial evidence;
+- reopening this product area requires a new explicit owner decision/TODO.
+
+Impact:
+P2-31 is closed by product-scope decision with no Frontend/Backend application-source change required.
+
+### DEC-017 — Quick Seller V2 is a parallel pilot and cannot replace V1 implicitly
+
+Status: Active
+Date: 2026-09-01
+
+Owner decision:
+- current production Quick Seller `/home/quick-sale` and current settings `/home/settings/quick-menu` remain available and unchanged while V2 is designed, implemented, and piloted;
+- V2 should be introduced as a separate `ขายด่วน V2` / experimental route, proposed at `/home/quick-sale-v2`, with separate V2 configuration proposed at `/home/settings/quick-sale-v2`;
+- V2 adds a presentation/configuration layer over the existing canonical Product/Variant and Order/payment contracts rather than creating a second catalog/financial truth;
+- V2-specific layout/mapping state must not mutate or disable V1, and pilot rollback must be possible by hiding/disabling the V2 entry without restoring Order/catalog data;
+- this decision approves the side-by-side architecture only. Final mockup/interaction approval is still required before P2-38 implementation, and replacing/retiring V1 requires a later explicit cutover decision.
+
+Impact:
+P2-38 remains review/owner-gated planning work, but its migration boundary is now fixed: build beside V1 first, prove parity, and treat any future cutover as a separate decision.
+
+### DEC-018 — Quick Seller V2 implementation may start functional-first before final visual polish
+
+Status: Active
+Date: 2026-09-01
+
+Owner decision:
+- the final P2-38 implementation gate is approved now; implementation may begin without waiting for a pixel-final mockup because the owner will refine UI styling after a usable V2 exists;
+- preserve DEC-017 completely: V1 remains available and unchanged as the production fallback, V2 stays on separate routes/configuration, and no implicit cutover is authorized;
+- start with a functional document-service-family pilot and explicit deterministic mapping into the existing canonical Product/Variant/QuickProduct and Order contracts;
+- reuse the existing authoritative checkout/payment/PromptPay/customer/VAT/backdate/tracking/cancellation/refund behavior rather than creating V2-specific financial truth;
+- missing/disabled mappings must fail closed, and V2 configuration must remain isolated so unfinished V2 setup cannot alter V1;
+- visual refinement, broader service-family expansion, and any V1 retirement/cutover remain follow-up work/decisions after the functional pilot is verified.
+
+Impact:
+P2-38 is no longer blocked on mockup approval and may move to `IN_PROGRESS`. The implementation should optimize first for correct functional separation, deterministic mapping, and checkout parity; UI polish may follow without reopening the architecture decision.
+
 ## Needs Decision
 
-The previously tracked ND-001, ND-003, ND-005, ND-006, and ND-007 are resolved by DEC-010 through DEC-014 above. TODO-level gates such as cashier-shift policy (P2-31) and final Quick Seller V2 mockup approval (P2-38) remain intentionally unresolved until separately approved.
+The previously tracked ND-001, ND-003, ND-005, ND-006, and ND-007 are resolved by DEC-010 through DEC-014 above. P2-31 is resolved by DEC-016. P2-38 final implementation approval is resolved by DEC-018; replacing/retiring Quick Seller V1 remains a separate future owner decision.
