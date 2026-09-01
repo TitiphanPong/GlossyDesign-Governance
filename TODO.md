@@ -1211,6 +1211,11 @@ Progress (2026-09-02 — Quick Sale V2 A4/A3 color + quantity preset parity merg
 - Verification passed before integration: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
 - V1, Backend application source/contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
 
+Progress (2026-09-02 — Quick Sale V2 cart-removal parity merged/pushed):
+- Frontend commit `416bd08` is now on `origin/main`. A dedicated Chromium regression adds a configured Quick Sale V2 document item, verifies checkout becomes available, removes that exact cart item through the accessible remove action, then verifies the item is gone and checkout is disabled again for the empty cart.
+- Verification passed before integration: Chromium critical workflows 15/15 including the new removal scenario, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, the focused Chromium removal regression 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This is test-only parity evidence; V1, Backend contracts/financial authority, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
