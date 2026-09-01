@@ -1193,6 +1193,12 @@ Progress (2026-09-01 — mixed Print + Copy document Order parity merged/pushed)
 - Verification on the already-integrated local-main commit passed before finishing the interrupted push: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. `origin/main` was an ancestor of local `main` with no divergence, so the safe pending push was completed.
 - This is test-fixture/browser parity evidence only; V1, production pricing authority, Backend contracts, and Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work.
 
+Progress (2026-09-02 — Quick Sale V2 tax-invoice/VAT checkout parity merged/pushed):
+- Frontend commit `645a6ce` is now on `origin/main`. A dedicated Chromium regression takes the mapped Quick Sale V2 document flow through the shared payment modal, selects an existing customer with tax profile, switches the document type to `ใบกำกับภาษี`, and completes the cash checkout.
+- The controlled Order-create payload is asserted with the selected customer/tax snapshot, `taxInvoice = yes`, the mapped Quick Product identity, and VAT-inclusive ฿26.75 payment/received amount for the ฿25.00 VAT-exclusive item. This proves V2 reuses the existing authoritative VAT/tax-invoice checkout contract rather than introducing a second calculation path.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This slice is test-only parity evidence; V1, Backend financial logic/contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
