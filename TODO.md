@@ -1187,6 +1187,12 @@ Progress (2026-09-01 — Quick Sale V2 PromptPay checkout parity merged/pushed):
 - Verification passed on current-main-based feature branch: focused Quick Sale V2 Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 check, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
 - This is test-only pilot parity evidence; V1 behavior, payment calculations, Backend contracts, and production cutover were not changed. P2-38 remains `IN_PROGRESS` for other approved parity/service-family work.
 
+Progress (2026-09-01 — mixed Print + Copy document Order parity merged/pushed):
+- Frontend commit `e0b9883` is now on `origin/main`. The controlled Quick Sale V2 E2E fixture now publishes both A4 B&W Print and A4 B&W Copy mappings; the Chromium regression adds Print ×5 and Copy ×1 into the same cart, then completes the shared PromptPay checkout.
+- The Order-create response is asserted against both explicit `quickProductId` lines and the combined ฿140.00 PromptPay payment fact, proving multiple document mappings remain distinct through the shared cart/checkout contract rather than collapsing to one SKU or price.
+- Verification on the already-integrated local-main commit passed before finishing the interrupted push: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. `origin/main` was an ancestor of local `main` with no divergence, so the safe pending push was completed.
+- This is test-fixture/browser parity evidence only; V1, production pricing authority, Backend contracts, and Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
