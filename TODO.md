@@ -970,23 +970,17 @@ Acceptance:
 
 ### P2-31 — Add cashier shift opening/closing and cash reconciliation
 
-Status: BLOCKED  
+Status: DONE
 Area: Frontend + Backend / Cashier / Financial operations
 
-Product opportunity / blocker:
-The system reports cash collections but has no shift/opening-float/cash-in-out/closing-count model. This is valuable for a cashier system, but discrepancy and correction semantics are financial policy and must be approved before implementation.
+Owner decision resolved by DEC-016 (2026-09-01):
+- GlossyDesign will **not implement** cashier shift opening/closing, opening float, drawer cash-in/out, closing cash count, or shift discrepancy reconciliation at this time.
+- This item is closed by an explicit product-scope decision, not by feature delivery. No Shift model, API, menu, migration, or financial projection should be introduced from this TODO.
+- Existing authoritative Order/payment/refund facts remain unchanged and continue to drive the financial reporting that already exists.
+- Reintroducing cashier-shift reconciliation in the future requires a new explicit owner decision/TODO rather than silently reopening this historical item.
 
-Proposed menu:
-Add `กะเงินสด / ปิดกะ` under `SALES` or a cashier utility area once the owner approves the policy.
-
-Decision required before implementation:
-Define opening float, who may open/close a shift, cash-in/cash-out reasons, whether more than one cashier can share a drawer, expected-vs-counted cash calculation, discrepancy approval/reason requirements, reopening policy, and how refunds/reversals from P1-02 affect a closed shift.
-
-Acceptance after policy approval:
-- Shift has immutable open/close actor/time facts, opening float, authorized cash adjustments, expected cash from authoritative cash payments, counted closing cash, and an auditable discrepancy.
-- PromptPay/non-cash receipts never inflate physical drawer expectation.
-- Closed shifts cannot be silently edited; correction follows an approved append-only/reopen policy.
-- Provide a mobile-safe cashier close flow plus daily/shift reconciliation report with tests around satang precision and concurrent close attempts.
+Closure evidence:
+No Frontend or Backend application source change is required for this scope decision.
 
 ### P2-32 — Add an executable Production Job creation workflow
 
@@ -1141,17 +1135,41 @@ Acceptance:
 - `ARCHITECTURE.md` drift is detected using current SHAs and can trigger a bounded architecture-refresh TODO rather than silently rewriting architecture during unrelated implementation.
 - The implementation runner continues to obey DEC-008 selection rules and may consume scanner-created safe TODOs on later runs.
 
-### P2-38 — Redesign Quick Seller + Quick Seller Settings around service families with deliberate modal confirmation
+### P2-38 — Implement a parallel Quick Seller V2 + Settings V2 around service families
 
-Status: BLOCKED  
+Status: IN_PROGRESS  
 Area: Frontend + Backend / Quick Seller / Quick Seller Settings / UX  
 Risk: Medium / Cashier speed and configuration correctness
 
-Owner plan (2026-08-30):
-- This item is intentionally **plan-only** for now. Do not implement, migrate data, or alter Quick Seller behavior until the owner explicitly approves the final mockup/flow for implementation.
+Progress (2026-09-01 — functional document-family pilot merged/pushed):
+- Frontend commit `f8261f7` is now on `origin/main`: parallel `/home/quick-sale-v2`, document configurator, explicit published mapping resolution, isolated `/home/settings/quick-sale-v2`, V1 regression/navigation coverage, and the existing V1 production route remains intact.
+- Backend commit `b8919cc` is now on `origin/main`: isolated Quick Sale V2 Draft/Published configuration API backed by explicit existing QuickProduct mappings, duplicate/missing/unsellable mapping validation, and focused service coverage.
+- Verification completed before integration: Frontend full tests 199/199, ESLint, UTF-8, production build, and browser critical workflows passed; Backend unit tests 214 passed / 15 skipped, ESLint, build, E2E 37 passed / 2 skipped, and focused Quick Sale V2 tests 3/3 passed.
+- This closes the first functional pilot slice, not the full P2-38 roadmap. Keep `IN_PROGRESS` for the remaining approved phases such as fuller Settings V2 arrangement/preview and broader parity expansion; V1 cutover/retirement remains separately owner-gated.
+
+Progress (2026-09-01 — Settings V2 arrangement/preview slice merged/pushed):
+- Frontend commit `ef5c14a` is now on `origin/main`. Settings V2 now exposes the planned `จัดหน้าขาย`, `ราคาและตัวเลือก`, and `Preview` sections while continuing to use the existing isolated Draft/Published V2 configuration contract.
+- `ราคาและตัวเลือก` presents the document-family mapping as a human-readable Print/Copy/Scan × A4/A3 × B&W/Color matrix; V2 still stores only explicit QuickProduct mappings and reads current product pricing instead of creating a second price truth.
+- `Preview` reuses the real document configurator against the current Draft mapping but runs in a preview-only mode that cannot add to cart or mutate Published configuration. The production V2 configurator default behavior is unchanged.
+- The current single-family pilot shows `งานเอกสาร` as the first selling-screen family with readiness/mapping status. Persistent multi-family order/enable/featured state remains intentionally deferred until a second real family exists, rather than inventing configuration fields with no runtime consumer.
+- Verification passed before integration: Frontend Node tests 199/199, ESLint zero warnings, UTF-8 check, production build/TypeScript, `git diff --check`, and critical Playwright workflows 8/8. After fast-forwarding to local `main`, Node tests 199/199 and ESLint passed again before `main` was pushed.
+- P2-38 remains `IN_PROGRESS`: broader service-family expansion, richer family editing/defaults, pilot parity QA, and any future V1 cutover are still separate remaining phases.
+
+Owner implementation approval (2026-09-01, DEC-018):
+- The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
+- Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
 - Preserve deliberate confirmation steps. The goal is to reduce duplicated choices, not to minimize clicks so aggressively that staff can select the wrong job/options without noticing.
 - Preferred cashier flow: `เลือกกลุ่มงาน → Modal เลือกรายละเอียด → เพิ่ม Cart → ตรวจรายการ → Modal ชำระเงิน → จบการขาย`.
 - Keep the existing payment-modal concept for payment method, cash received/change, PromptPay, customer/tax document data, and backdated sale controls rather than crowding those responsibilities onto the main selling surface.
+
+Owner planning direction resolved by DEC-017 (2026-09-01):
+- Keep the current production Quick Seller at `/home/quick-sale` and its current settings at `/home/settings/quick-menu` fully usable while V2 is developed and piloted.
+- Build V2 as a **parallel menu/route**, proposed as `ขายด่วน V2` with an `ทดลอง` indicator at `/home/quick-sale-v2`. Do not redirect or replace the current Quick Seller during the pilot.
+- Keep V2 settings/configuration separate from the current Quick Seller settings, proposed at `/home/settings/quick-sale-v2`; Manager/Admin may configure V2 while cashier-facing V1 remains unchanged.
+- V2 is a new presentation/configuration layer only. It must reuse the authoritative Product/Variant identity, Order creation/payment/refund/tax/customer/backdate contracts, and must not create a second financial truth.
+- V2-specific layout/group/option configuration must be isolated from V1 configuration so an incomplete V2 mapping or broken draft cannot alter the current selling screen.
+- Rollback during pilot must be trivial: hide/disable the V2 menu and continue using V1 without catalog/order data recovery.
+- Final implementation remains separately approval-gated: this planning direction authorizes the parallel architecture, **not** the final mockup or production cutover.
 
 Problem / current evidence:
 - Current Quick Seller effectively presents `1 SKU = 1 card`, which explodes related document combinations into separate cards such as Print/Copy × A4/A3 × BW/Color and makes the selling surface increasingly scan-heavy as the catalog grows.
@@ -1194,12 +1212,15 @@ Data/API direction (after approval):
 - A one-time migration helper may propose mappings from existing data, but mappings must be reviewable/persisted explicitly before use.
 - If a selected combination has no valid mapping/price, fail visibly and disable Add-to-Cart rather than guessing another SKU.
 
-Implementation phases after owner approval:
-1. UX/IA — finalize Quick Seller, configurator Modal, Cart edit flow, Settings layout, group editor, price matrix, and Preview mockups.
-2. Data/API — define the presentation-layer schema/API and reviewed migration/mapping approach without destructive catalog changes.
-3. Quick Seller V2 — implement service families and the document-work configurator first, then integrate with the existing Cart/order payload.
-4. Settings V2 — implement selling-screen arrangement, group editor, options/defaults, price matrix, explicit mapping/Advanced view, and Preview.
-5. Migration + QA — migrate/review existing combinations and verify parity with the current Order/price behavior before rollout.
+Implementation phases after final owner mockup approval:
+1. **V1 regression lock** — treat `/home/quick-sale` and `/home/settings/quick-menu` as the production fallback; add/retain browser coverage for one complete V1 checkout before extracting or sharing any checkout code.
+2. **V2 shell** — add `/home/quick-sale-v2` and a separate `ขายด่วน V2` (`ทดลอง`) menu entry without changing the current default selling route. Add `/home/settings/quick-sale-v2` as the V2 configuration surface.
+3. **V2 data/API** — add a non-destructive presentation layer (for example `QuickSaleGroup` / versioned V2 layout) with explicit Service Family → option combination → canonical Product/Variant/QuickProduct mapping. Prefer Draft/Published configuration so unfinished setup cannot affect the pilot screen.
+4. **Pilot family: งานเอกสาร** — implement one family first with Print / Copy / Scan, size, B&W / Color, quantity presets, resolved unit price/total, visible summary, and explicit `เพิ่มลงรายการ`. Missing or disabled mappings fail closed.
+5. **Shared checkout integration** — normalize the V2 cart selection into the existing authoritative Order/cart payload and reuse the current payment, PromptPay/cash, customer, VAT/tax invoice, backdate, tracking, cancellation/refund boundaries. Do not fork payment calculations into V2.
+6. **Settings V2 + Preview** — implement selling-screen arrangement, group editor, options/defaults, price matrix, explicit mapping/Advanced view, Draft/Published state, and live Preview without mutating V1 settings.
+7. **Pilot + parity QA** — run V1 and V2 side-by-side with E2E coverage for both. Expand service families one at a time only after the document-family pilot is stable; staff can always fall back to V1.
+8. **Cutover is a separate decision** — changing the primary menu/default route or retiring V1 requires a later explicit owner approval. Initial V2 rollout must not delete V1 code, historical QuickProduct identities, or existing Orders.
 
 QA scenarios after implementation:
 - Print A4 B&W ×1 and ×50; Print A4 Color; Copy A4 B&W; A3 Color.
@@ -1211,16 +1232,20 @@ QA scenarios after implementation:
 - Existing historical Orders and current QuickProduct/SKU identifiers remain readable and unchanged.
 
 Definition of Done after implementation:
-- The main Quick Seller no longer requires a card wall for Print/Copy × A4/A3 × B&W/Color combinations.
+- Current Quick Seller V1 remains usable at `/home/quick-sale` with its existing settings/fallback path intact throughout the V2 pilot.
+- Quick Seller V2 uses service families so common document work no longer requires a card wall for Print/Copy × A4/A3 × B&W/Color combinations.
 - Common document jobs are fast to configure while still presenting a deliberate summary/confirmation before Add-to-Cart.
 - Related options are handled inside one coherent configurator Modal, not a chain of Modals.
-- The payment flow remains a deliberate Modal and retains its current financial/customer/tax/backdate responsibilities unless separately approved.
-- A non-technical Settings user can arrange the selling screen and maintain normal options/prices without understanding `code`, `typeCode`, numeric sort order, or raw SKU IDs.
-- SKU resolution is explicit and deterministic; unmapped combinations cannot silently create the wrong Order line.
-- Existing Orders/catalog data are preserved; no destructive catalog merge or P2-08 ownership decision is smuggled into this redesign.
+- The payment flow remains a deliberate shared/authoritative flow and retains its current financial/customer/tax/backdate responsibilities unless separately approved.
+- A non-technical Settings V2 user can arrange the V2 selling screen and maintain normal options/prices without understanding `code`, `typeCode`, numeric sort order, or raw SKU IDs.
+- SKU/Product resolution is explicit and deterministic; unmapped combinations cannot silently create the wrong Order line.
+- V2 draft/configuration failures cannot alter or disable V1, and pilot rollback requires no Order/catalog data restoration.
+- Existing Orders/catalog data are preserved; no destructive catalog merge or P2-08/DEC-011 ownership change is smuggled into this redesign.
+- Replacing/retiring V1 is outside this TODO's initial rollout and requires a separate owner cutover decision.
 
-Blocker / implementation gate:
-- Await explicit owner approval of the final Quick Seller + Settings V2 mockup/interaction flow. Until then, this TODO is planning evidence only and must not be selected by the automated implementation runner.
+Implementation gate resolved (2026-09-01):
+- DEC-018 records explicit owner approval to implement the functional parallel V2 pilot now and defer pixel-level visual refinement until after a usable flow exists.
+- Remaining cutover/retirement of V1 is still separately decision-gated and is not part of this implementation.
 
 ## P3 — Low (14)
 
