@@ -1519,10 +1519,16 @@ Run the browser E2E suite with the normal developer server left running, plus Fr
 
 ### P3-14 — Keep the internal Artwork POC out of anonymous production access
 
-Status: OPEN  
+Status: DONE
 Area: Frontend / Auth boundary / Deployment hardening  
 Risk: Medium  
 Owner: Frontend
+
+Progress (2026-09-01):
+- Frontend commit `b133a80` is on `origin/main`. The existing Next.js auth proxy was moved from repository root to `src/proxy.ts`, matching the project’s `src/app` layout so Next.js 16 actually compiles the intended proxy boundary; `/artwork-poc` was then added to the protected prefixes and matcher.
+- Anonymous `/artwork-poc` now redirects to `/login?redirectTo=/artwork-poc`; authenticated cashier/staff test access returns to the POC through the normal admin-session flow. No production test bypass, Artwork UI redesign, Backend API, or public-customer-route policy change was introduced.
+- Focused Chromium Artwork/auth E2E passed 3/3 before integration and again on merged `main`. Frontend full tests passed 204/204, ESLint zero warnings, UTF-8 validation, production build/TypeScript, `npm audit` with 0 vulnerabilities, and `git diff --check` all passed before integration; merged `main` was rechecked with focused E2E 3/3, full tests 204/204, and ESLint before confirming `origin/main` at `b133a80`.
+- Runtime evidence from the failed first focused run showed the old root-level `proxy.ts` was not present in the Next.js middleware manifest. After relocating it under `src/`, production build output explicitly reports `ƒ Proxy (Middleware)` and the anonymous-route regression passes fail-closed.
 
 Fresh-scan evidence (2026-09-01):
 - Current Frontend `main` adds the deterministic `/artwork-poc` route in commit range `6ce9f36..4dd350a`.
