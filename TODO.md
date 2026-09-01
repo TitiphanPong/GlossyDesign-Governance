@@ -1155,6 +1155,13 @@ Progress (2026-09-01 — Settings V2 arrangement/preview slice merged/pushed):
 - Verification passed before integration: Frontend Node tests 199/199, ESLint zero warnings, UTF-8 check, production build/TypeScript, `git diff --check`, and critical Playwright workflows 8/8. After fast-forwarding to local `main`, Node tests 199/199 and ESLint passed again before `main` was pushed.
 - P2-38 remains `IN_PROGRESS`: broader service-family expansion, richer family editing/defaults, pilot parity QA, and any future V1 cutover are still separate remaining phases.
 
+Progress (2026-09-01 — document defaults slice merged/pushed):
+- Frontend commit `d061060` is now on `origin/main`: Settings V2 stores Draft defaults for work type, size, color mode, and quantity; Preview initializes from Draft defaults; cashier-facing Quick Seller V2 initializes the document configurator from Published defaults. Legacy/malformed config falls back safely to Print / A4 / B&W / 1 and V1 remains untouched.
+- Backend commit `1fa4a90` is now on `origin/main`: V2 config persists `draftDefaults` and `publishedDefaults` separately, validates the default quantity range, and Publish fails closed unless the selected default combination has an explicit mapping; pricing and checkout authority remain unchanged.
+- Verification passed for the task scope: Frontend 204/204 Node tests, ESLint, UTF-8, production build/TypeScript, `git diff --check`, and Chromium critical workflows 11/11 including Quick Sale V2; Backend focused defaults tests 5/5, full unit 217 passed / 15 skipped, E2E 37 passed / 2 skipped, build, task-scoped Quick Sale V2 ESLint, and `git diff --check` passed.
+- Repository-wide Backend ESLint still reports two pre-existing Prettier failures in unchanged Order files (`src/orders/dto/list-orders-query.dto.ts:100` and `src/orders/order-reporting.service.ts:352`); this slice did not modify those files.
+- P2-38 stays `IN_PROGRESS`: multi-family expansion, edit-cart configurator parity, broader pilot parity QA, and any future V1 cutover remain separate work.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
