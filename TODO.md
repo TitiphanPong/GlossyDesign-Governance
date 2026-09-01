@@ -1169,6 +1169,12 @@ Progress (2026-09-01 — unmapped combination fail-closed browser regression mer
 - Verification passed before integration: focused Chromium regression 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 check, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. The same focused Chromium regression passed again on local `main` before pushing `main`.
 - This slice adds durable pilot parity/fail-closed evidence only; P2-38 remains `IN_PROGRESS` for the remaining approved work and no V1 cutover/retirement was performed.
 
+Progress (2026-09-01 — Draft→Publish concurrency CAS merged/pushed):
+- Backend commits `d1eb7bb` and `ee91dd4` are now on `origin/main`. Quick Sale V2 Draft updates increment a monotonic `draftRevision`; Publish validates one exact draft snapshot and atomically updates Published configuration only when that same revision still matches. A concurrent Draft save now causes an explicit conflict instead of silently publishing stale mappings/defaults.
+- Focused regression coverage exercises the Draft-update ↔ Publish interleaving and verifies fail-closed behavior. Legacy configuration without `draftRevision` remains publishable through the revision-0 compatibility predicate, while the next Draft save upgrades it to the monotonic revision path.
+- Verification passed before integration: focused Quick Sale V2 tests 6/6, full Backend unit 218 passed / 15 skipped, E2E 37 passed / 2 skipped, production build/TypeScript, task-scoped ESLint, `npm audit` 0 vulnerabilities, and `git diff --check`. Two previously recorded repository-wide Prettier baseline failures in unchanged Order files were corrected as formatting-only commit `d1eb7bb`, after which full Backend ESLint passed; focused Quick Sale V2 tests 6/6 and full Backend ESLint passed again on local `main` before pushing `main`.
+- P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining pilot parity work; V1 cutover/retirement remains separately owner-gated.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
