@@ -1175,6 +1175,18 @@ Progress (2026-09-01 — Draft→Publish concurrency CAS merged/pushed):
 - Verification passed before integration: focused Quick Sale V2 tests 6/6, full Backend unit 218 passed / 15 skipped, E2E 37 passed / 2 skipped, production build/TypeScript, task-scoped ESLint, `npm audit` 0 vulnerabilities, and `git diff --check`. Two previously recorded repository-wide Prettier baseline failures in unchanged Order files were corrected as formatting-only commit `d1eb7bb`, after which full Backend ESLint passed; focused Quick Sale V2 tests 6/6 and full Backend ESLint passed again on local `main` before pushing `main`.
 - P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining pilot parity work; V1 cutover/retirement remains separately owner-gated.
 
+Progress (2026-09-01 — shared checkout parity QA merged/pushed):
+- Frontend commit `6160b58` is now on `origin/main`. The existing Quick Sale V2 Chromium regression now continues from explicit mapped selection and cart editing through the shared cash payment modal to a successful Order, proving the document-family pilot reuses the existing checkout path instead of stopping at cart-only coverage.
+- The shared E2E login helper now waits for the real admin-session GET hydration check and successful POST login response, with a bounded route-compile allowance, so cold isolated Next.js test worktrees do not click the login form before hydration completes. This is test-harness-only and does not change application authentication behavior.
+- Verification passed before integration: focused Quick Sale V2 Chromium 1/1, full browser suite 15/15, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 check, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding to local `main`, focused Quick Sale V2 Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- P2-38 remains `IN_PROGRESS` for additional approved pilot parity and future service-family expansion; V1 remains intact and no cutover/retirement was performed.
+
+Progress (2026-09-01 — Quick Sale V2 PromptPay checkout parity merged/pushed):
+- Frontend commit `d61f6c9` is now on `origin/main`. The Quick Sale V2 Chromium regression now completes the same mapped/edit-cart flow through the shared PromptPay payment path, verifies the configured `Glossy E2E` / masked PromptPay identity, confirms payment, and reaches the successful Order screen.
+- The regression also reads the controlled E2E Order-create payload and verifies `initialPayment.method = promptpay` with the authoritative ฿125.00 amount/received amount, so the test proves the submitted payment fact rather than only checking UI selection.
+- Verification passed on current-main-based feature branch: focused Quick Sale V2 Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 check, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This is test-only pilot parity evidence; V1 behavior, payment calculations, Backend contracts, and production cutover were not changed. P2-38 remains `IN_PROGRESS` for other approved parity/service-family work.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
@@ -1519,10 +1531,16 @@ Run the browser E2E suite with the normal developer server left running, plus Fr
 
 ### P3-14 — Keep the internal Artwork POC out of anonymous production access
 
-Status: OPEN  
+Status: DONE
 Area: Frontend / Auth boundary / Deployment hardening  
 Risk: Medium  
 Owner: Frontend
+
+Progress (2026-09-01):
+- Frontend commit `b133a80` is on `origin/main`. The existing Next.js auth proxy was moved from repository root to `src/proxy.ts`, matching the project’s `src/app` layout so Next.js 16 actually compiles the intended proxy boundary; `/artwork-poc` was then added to the protected prefixes and matcher.
+- Anonymous `/artwork-poc` now redirects to `/login?redirectTo=/artwork-poc`; authenticated cashier/staff test access returns to the POC through the normal admin-session flow. No production test bypass, Artwork UI redesign, Backend API, or public-customer-route policy change was introduced.
+- Focused Chromium Artwork/auth E2E passed 3/3 before integration and again on merged `main`. Frontend full tests passed 204/204, ESLint zero warnings, UTF-8 validation, production build/TypeScript, `npm audit` with 0 vulnerabilities, and `git diff --check` all passed before integration; merged `main` was rechecked with focused E2E 3/3, full tests 204/204, and ESLint before confirming `origin/main` at `b133a80`.
+- Runtime evidence from the failed first focused run showed the old root-level `proxy.ts` was not present in the Next.js middleware manifest. After relocating it under `src/`, production build output explicitly reports `ƒ Proxy (Middleware)` and the anonymous-route regression passes fail-closed.
 
 Fresh-scan evidence (2026-09-01):
 - Current Frontend `main` adds the deterministic `/artwork-poc` route in commit range `6ce9f36..4dd350a`.
