@@ -1160,7 +1160,14 @@ Progress (2026-09-01 — document defaults slice merged/pushed):
 - Backend commit `1fa4a90` is now on `origin/main`: V2 config persists `draftDefaults` and `publishedDefaults` separately, validates the default quantity range, and Publish fails closed unless the selected default combination has an explicit mapping; pricing and checkout authority remain unchanged.
 - Verification passed for the task scope: Frontend 204/204 Node tests, ESLint, UTF-8, production build/TypeScript, `git diff --check`, and Chromium critical workflows 11/11 including Quick Sale V2; Backend focused defaults tests 5/5, full unit 217 passed / 15 skipped, E2E 37 passed / 2 skipped, build, task-scoped Quick Sale V2 ESLint, and `git diff --check` passed.
 - Repository-wide Backend ESLint still reports two pre-existing Prettier failures in unchanged Order files (`src/orders/dto/list-orders-query.dto.ts:100` and `src/orders/order-reporting.service.ts:352`); this slice did not modify those files.
-- P2-38 stays `IN_PROGRESS`: multi-family expansion, edit-cart configurator parity, broader pilot parity QA, and any future V1 cutover remain separate work.
+- Frontend commit `f35832a` is now on `origin/main`: V2 document cart lines retain their explicit Print/Copy/Scan + A4/A3 + B&W/Color selection as presentation-only metadata, expose `แก้ไข`, reopen the same document configurator with the current selection/quantity, and safely replace/merge the edited cart line without changing the authoritative Order/checkout contract. Chromium regression now covers Add → Edit → reopen current selection → change quantity → save back to cart.
+- Verification for the edit-cart slice passed: Frontend 204/204 Node tests, ESLint zero-warning, UTF-8, production build/TypeScript, `git diff --check`, feature-branch Chromium Quick Sale V2 regression 1/1, and post-merge `main` Chromium Quick Sale V2 regression 1/1.
+- P2-38 stays `IN_PROGRESS`: multi-family expansion, broader pilot parity QA, and any future V1 cutover remain separate work.
+
+Progress (2026-09-01 — unmapped combination fail-closed browser regression merged/pushed):
+- Frontend commit `e1b15fb` is now on `origin/main`: Chromium coverage explicitly selects an unmapped Quick Sale V2 document combination, verifies the visible Settings V2 mapping warning, confirms `เพิ่มลงรายการ` is disabled, then returns to the mapped combination and confirms the action is re-enabled.
+- Verification passed before integration: focused Chromium regression 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 check, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. The same focused Chromium regression passed again on local `main` before pushing `main`.
+- This slice adds durable pilot parity/fail-closed evidence only; P2-38 remains `IN_PROGRESS` for the remaining approved work and no V1 cutover/retirement was performed.
 
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
