@@ -1222,7 +1222,7 @@ Definition of Done after implementation:
 Blocker / implementation gate:
 - Await explicit owner approval of the final Quick Seller + Settings V2 mockup/interaction flow. Until then, this TODO is planning evidence only and must not be selected by the automated implementation runner.
 
-## P3 — Low (10)
+## P3 — Low (14)
 
 ### P3-01 — Remove verified dead Dashboard legacy implementation
 
@@ -1471,3 +1471,32 @@ Do not terminate user-owned processes, change production runtime behavior, or so
 
 Verification:
 Run the browser E2E suite with the normal developer server left running, plus Frontend tests, ESLint, UTF-8, production build, and `git diff --check`.
+
+### P3-14 — Keep the internal Artwork POC out of anonymous production access
+
+Status: OPEN  
+Area: Frontend / Auth boundary / Deployment hardening  
+Risk: Medium  
+Owner: Frontend
+
+Fresh-scan evidence (2026-09-01):
+- Current Frontend `main` adds the deterministic `/artwork-poc` route in commit range `6ce9f36..4dd350a`.
+- `proxy.ts` protects only `/home`, `/dashboard`, `/orders`, `/pos`, `/storage`, `/invoice`, and `/print/invoice`; `/artwork-poc` is absent from both `PROTECTED_PREFIXES` and the proxy matcher.
+- `src/app/artwork-poc/page.tsx` has `robots: { index: false, follow: false }` but no admin-session/auth guard. `noindex` reduces search discovery only; it does not prevent direct anonymous access.
+- Current `e2e/artwork-poc.spec.ts` verifies rendering/responsiveness but does not assert the intended production authentication/exposure boundary.
+- `TODO.md` contains no existing equivalent Artwork POC/public-route hardening item. The Feature Scout's Content Studio proposal is product planning and is not a substitute for this source-verified access-boundary finding.
+
+Dependencies / blockers:
+- Reuse the existing Frontend admin-session/proxy boundary or an equally fail-closed production-only route gate. No Backend change is required by the current finding.
+
+Acceptance:
+- An unauthenticated production request cannot render `/artwork-poc` directly.
+- Authenticated staff access may remain available if the POC is intentionally retained; local deterministic E2E/dev access must use an explicit test/development mechanism rather than weakening the production auth boundary.
+- Existing public customer routes and existing protected admin routes keep their current behavior.
+- Add regression coverage proving the chosen anonymous-production behavior and the intended authorized/test path.
+
+Do not touch:
+Do not redesign the artwork/content-studio UI, promote the POC into a product feature, add Backend APIs, or change unrelated public route policy as part of this hardening task.
+
+Verification:
+Focused Artwork/auth route E2E plus Frontend tests, ESLint, UTF-8, production build/TypeScript, `git diff --check`, and task-scoped route/proxy review.
