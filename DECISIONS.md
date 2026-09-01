@@ -267,6 +267,22 @@ Owner decision:
 Impact:
 P2-38 is no longer blocked on mockup approval and may move to `IN_PROGRESS`. The implementation should optimize first for correct functional separation, deterministic mapping, and checkout parity; UI polish may follow without reopening the architecture decision.
 
+### DEC-019 — Tax invoice book and sequence continue across months from September 2026
+
+Status: Active
+Date: 2026-09-01
+
+Owner decision:
+- August 2026 / Buddhist year 2569 (`invoicePeriod = 202608`) remains an isolated legacy monthly tax-invoice counter period;
+- September 2026 (`202609`) starts the continuing tax-invoice sequence at Book `001`, Invoice `001` and is the permanent counter scope for tax invoices whose `invoicePeriod` is `202609` or later;
+- crossing a month or year boundary from September 2026 onward must not reset `bookNo` or `invoiceSequence`;
+- each book contains 100 invoice numbers: total sequence 100 is Book `001` / Invoice `100`, total sequence 101 is Book `002` / Invoice `001`;
+- `invoicePeriod` and the period segment in the full `invoiceNumber` continue to reflect the Order's authoritative `saleDate` in `Asia/Bangkok`, while only the book/sequence counter is continuous;
+- already issued tax invoice identities are immutable and are never renumbered by this policy change.
+
+Impact:
+Runtime allocation, conversion transactions, reconciliation, and tax-invoice backfill tooling must resolve all periods from `202609` onward to the shared `202609` counter while retaining the actual invoice period on each Order. The existing September counter is reused, so no counter migration is required when this policy is deployed before a later monthly counter has issued numbers.
+
 ## Needs Decision
 
 The previously tracked ND-001, ND-003, ND-005, ND-006, and ND-007 are resolved by DEC-010 through DEC-014 above. P2-31 is resolved by DEC-016. P2-38 final implementation approval is resolved by DEC-018; replacing/retiring Quick Seller V1 remains a separate future owner decision.
