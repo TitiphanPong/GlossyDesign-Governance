@@ -1222,6 +1222,12 @@ Progress (2026-09-02 — Quick Sale V2 Scan mapping parity merged/pushed):
 - Verification passed before integration: focused Chromium 2/2, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 2/2, Node tests 204/204, and ESLint passed again before pushing `main`.
 - This slice changes only controlled E2E fixture/browser coverage; V1, Backend application/financial contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
 
+Progress (2026-09-02 — Quick Sale V2 disabled-mapping fail-closed parity merged/pushed):
+- Frontend commit `39bf657` is now on `origin/main`. The controlled fixture publishes a Scan + A3 + B&W mapping whose referenced Quick Product is explicitly inactive, and Chromium verifies V2 treats that configured-but-unsellable SKU as unavailable rather than resolving or displaying it.
+- The regression requires the clear `SKU ที่ผูกไว้ไม่พร้อมขายหรือหาไม่พบ กรุณาตรวจ Settings V2` error, confirms the disabled product name is not presented as sellable, and keeps `เพิ่มลงรายการ` disabled. This locks the approved rule that both missing mappings and disabled mapped SKUs fail closed instead of guessing another product.
+- Verification passed before integration: focused Chromium 1/1, full Chromium critical workflows 17/17, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, the focused disabled-mapping Chromium regression passed 1/1 before pushing `main`.
+- This slice changes only controlled E2E fixture/browser coverage; V1, Backend application/financial contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
