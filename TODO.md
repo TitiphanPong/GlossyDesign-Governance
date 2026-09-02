@@ -1228,6 +1228,12 @@ Progress (2026-09-02 — Quick Sale V2 disabled-mapping fail-closed parity merge
 - Verification passed before integration: focused Chromium 1/1, full Chromium critical workflows 17/17, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, the focused disabled-mapping Chromium regression passed 1/1 before pushing `main`.
 - This slice changes only controlled E2E fixture/browser coverage; V1, Backend application/financial contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
 
+Progress (2026-09-02 — Quick Sale V2 Print A4 B&W ×50 preset parity merged/pushed):
+- Frontend commit `85aa4f4` is now on `origin/main`. A dedicated Chromium regression selects the document-family default Print + A4 + B&W combination, uses the explicit quantity preset ×50, verifies the visible selection summary and ฿1,250.00 total, then completes the shared cash checkout.
+- The controlled Order-create payload is asserted with the existing explicit `quickProductId = product-e2e-1`, quantity 50, and authoritative cash payment/received amount ฿1,250.00. This closes the explicit P2-38 QA scenario for Print A4 B&W ×50 without changing pricing logic or introducing another SKU-resolution path.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 1/1, Node tests, and ESLint passed again before pushing `main`.
+- This slice changes only browser regression coverage; V1, Backend application/financial contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
