@@ -1175,6 +1175,71 @@ Progress (2026-09-01 — Draft→Publish concurrency CAS merged/pushed):
 - Verification passed before integration: focused Quick Sale V2 tests 6/6, full Backend unit 218 passed / 15 skipped, E2E 37 passed / 2 skipped, production build/TypeScript, task-scoped ESLint, `npm audit` 0 vulnerabilities, and `git diff --check`. Two previously recorded repository-wide Prettier baseline failures in unchanged Order files were corrected as formatting-only commit `d1eb7bb`, after which full Backend ESLint passed; focused Quick Sale V2 tests 6/6 and full Backend ESLint passed again on local `main` before pushing `main`.
 - P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining pilot parity work; V1 cutover/retirement remains separately owner-gated.
 
+Progress (2026-09-01 — shared checkout parity QA merged/pushed):
+- Frontend commit `6160b58` is now on `origin/main`. The existing Quick Sale V2 Chromium regression now continues from explicit mapped selection and cart editing through the shared cash payment modal to a successful Order, proving the document-family pilot reuses the existing checkout path instead of stopping at cart-only coverage.
+- The shared E2E login helper now waits for the real admin-session GET hydration check and successful POST login response, with a bounded route-compile allowance, so cold isolated Next.js test worktrees do not click the login form before hydration completes. This is test-harness-only and does not change application authentication behavior.
+- Verification passed before integration: focused Quick Sale V2 Chromium 1/1, full browser suite 15/15, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 check, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding to local `main`, focused Quick Sale V2 Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- P2-38 remains `IN_PROGRESS` for additional approved pilot parity and future service-family expansion; V1 remains intact and no cutover/retirement was performed.
+
+Progress (2026-09-01 — Quick Sale V2 PromptPay checkout parity merged/pushed):
+- Frontend commit `d61f6c9` is now on `origin/main`. The Quick Sale V2 Chromium regression now completes the same mapped/edit-cart flow through the shared PromptPay payment path, verifies the configured `Glossy E2E` / masked PromptPay identity, confirms payment, and reaches the successful Order screen.
+- The regression also reads the controlled E2E Order-create payload and verifies `initialPayment.method = promptpay` with the authoritative ฿125.00 amount/received amount, so the test proves the submitted payment fact rather than only checking UI selection.
+- Verification passed on current-main-based feature branch: focused Quick Sale V2 Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 check, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This is test-only pilot parity evidence; V1 behavior, payment calculations, Backend contracts, and production cutover were not changed. P2-38 remains `IN_PROGRESS` for other approved parity/service-family work.
+
+Progress (2026-09-01 — mixed Print + Copy document Order parity merged/pushed):
+- Frontend commit `e0b9883` is now on `origin/main`. The controlled Quick Sale V2 E2E fixture now publishes both A4 B&W Print and A4 B&W Copy mappings; the Chromium regression adds Print ×5 and Copy ×1 into the same cart, then completes the shared PromptPay checkout.
+- The Order-create response is asserted against both explicit `quickProductId` lines and the combined ฿140.00 PromptPay payment fact, proving multiple document mappings remain distinct through the shared cart/checkout contract rather than collapsing to one SKU or price.
+- Verification on the already-integrated local-main commit passed before finishing the interrupted push: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. `origin/main` was an ancestor of local `main` with no divergence, so the safe pending push was completed.
+- This is test-fixture/browser parity evidence only; V1, production pricing authority, Backend contracts, and Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work.
+
+Progress (2026-09-02 — Quick Sale V2 tax-invoice/VAT checkout parity merged/pushed):
+- Frontend commit `645a6ce` is now on `origin/main`. A dedicated Chromium regression takes the mapped Quick Sale V2 document flow through the shared payment modal, selects an existing customer with tax profile, switches the document type to `ใบกำกับภาษี`, and completes the cash checkout.
+- The controlled Order-create payload is asserted with the selected customer/tax snapshot, `taxInvoice = yes`, the mapped Quick Product identity, and VAT-inclusive ฿26.75 payment/received amount for the ฿25.00 VAT-exclusive item. This proves V2 reuses the existing authoritative VAT/tax-invoice checkout contract rather than introducing a second calculation path.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This slice is test-only parity evidence; V1, Backend financial logic/contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
+
+Progress (2026-09-02 — Quick Sale V2 backdated-sale checkout parity merged/pushed):
+- Frontend commit `b0a7597` is now on `origin/main`. A dedicated Chromium regression takes the mapped Quick Sale V2 document flow through the shared payment modal, switches to `ลงรายการย้อนหลัง`, supplies a prior-day sale date/time plus an explicit audit reason, and completes the cash checkout successfully.
+- The controlled Order-create payload is asserted with `entryMode = backdated`, `backdatedReason = รายการขายตกหล่น E2E`, a parseable `saleDate`, the existing mapped Quick Product identity, and the authoritative ฿25.00 cash payment fact. This proves V2 reuses the existing shared backdated-sale/audit contract rather than introducing a second date or financial path.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 1/1 and Node tests 204/204 passed; the first concurrent ESLint attempt hit a transient Playwright `test-results` directory race, then a deterministic rerun passed with zero warnings before `main` was pushed.
+- This slice is test-only parity evidence; V1, Backend financial logic/contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
+
+Progress (2026-09-02 — Quick Sale V2 A4/A3 color + quantity preset parity merged/pushed):
+- Frontend commit `a586996` is now on `origin/main`. The controlled Quick Sale V2 fixture adds explicit A4 Color and A3 Color SKU mappings, and Chromium verifies A4 Color quantity preset ×50 plus A3 Color ×1 can coexist through the shared cart and PromptPay checkout without SKU collapse.
+- The Order-create payload is asserted with distinct `quickProductId` values (`product-e2e-a4-color`, `product-e2e-a3-color`), quantities 50 and 1, and the combined PromptPay amount/received amount of ฿625.00. This is test-only parity evidence and does not change production pricing or Backend financial authority.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- V1, Backend application source/contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
+
+Progress (2026-09-02 — Quick Sale V2 cart-removal parity merged/pushed):
+- Frontend commit `416bd08` is now on `origin/main`. A dedicated Chromium regression adds a configured Quick Sale V2 document item, verifies checkout becomes available, removes that exact cart item through the accessible remove action, then verifies the item is gone and checkout is disabled again for the empty cart.
+- Verification passed before integration: Chromium critical workflows 15/15 including the new removal scenario, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, the focused Chromium removal regression 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This is test-only parity evidence; V1, Backend contracts/financial authority, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
+
+Progress (2026-09-02 — Quick Sale V2 Scan mapping parity merged/pushed):
+- Frontend commit `8c190b5` is now on `origin/main`. The controlled Quick Sale V2 fixture now publishes an explicit A4 B&W Scan mapping to `product-e2e-a4-scan`; Chromium verifies the configurator resolves the Scan SKU at ฿8.00, adds it to cart, completes the shared cash checkout, and submits the exact `quickProductId` with an authoritative ฿8.00 payment fact.
+- The existing fail-closed mapping regression remains intact by exercising the still-unmapped Copy + A3 combination before returning to a valid mapping, so adding Scan coverage does not weaken the rule that unknown combinations cannot silently guess another SKU.
+- Verification passed before integration: focused Chromium 2/2, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 2/2, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This slice changes only controlled E2E fixture/browser coverage; V1, Backend application/financial contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
+Progress (2026-09-02 — Quick Sale V2 disabled-mapping fail-closed parity merged/pushed):
+- Frontend commit `39bf657` is now on `origin/main`. The controlled fixture publishes a Scan + A3 + B&W mapping whose referenced Quick Product is explicitly inactive, and Chromium verifies V2 treats that configured-but-unsellable SKU as unavailable rather than resolving or displaying it.
+- The regression requires the clear `SKU ที่ผูกไว้ไม่พร้อมขายหรือหาไม่พบ กรุณาตรวจ Settings V2` error, confirms the disabled product name is not presented as sellable, and keeps `เพิ่มลงรายการ` disabled. This locks the approved rule that both missing mappings and disabled mapped SKUs fail closed instead of guessing another product.
+- Verification passed before integration: focused Chromium 1/1, full Chromium critical workflows 17/17, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, the focused disabled-mapping Chromium regression passed 1/1 before pushing `main`.
+- This slice changes only controlled E2E fixture/browser coverage; V1, Backend application/financial contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
+Progress (2026-09-02 — Quick Sale V2 Print A4 B&W ×50 preset parity merged/pushed):
+- Frontend commit `85aa4f4` is now on `origin/main`. A dedicated Chromium regression selects the document-family default Print + A4 + B&W combination, uses the explicit quantity preset ×50, verifies the visible selection summary and ฿1,250.00 total, then completes the shared cash checkout.
+- The controlled Order-create payload is asserted with the existing explicit `quickProductId = product-e2e-1`, quantity 50, and authoritative cash payment/received amount ฿1,250.00. This closes the explicit P2-38 QA scenario for Print A4 B&W ×50 without changing pricing logic or introducing another SKU-resolution path.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 1/1, Node tests, and ESLint passed again before pushing `main`.
+- This slice changes only browser regression coverage; V1, Backend application/financial contracts, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
+Progress (2026-09-02 — Quick Sale V2 authorized manual-price RBAC parity merged/pushed):
+- Frontend commit `775760f` is now on `origin/main`. The controlled E2E auth fixture now supports a Manager identity while retaining the existing staff identity, and a dedicated Chromium regression proves an authorized Manager sees `รายการอื่น / กำหนดราคาเอง`, adds `ค่าออกแบบ E2E` at 2 × ฿37.50, and completes the shared cash checkout at ฿75.00.
+- The Order-create payload is asserted with `customName = ค่าออกแบบ E2E`, quantity 2, and `priceOverride = { unitPrice: 37.5, reason: quick_sale_custom_item }`, confirming V2 reuses the existing explicit price-override contract rather than creating a second pricing path or weakening server authority. The earlier staff-denial regression remains in the same critical workflow suite.
+- Verification passed before integration: focused Chromium 1/1, full Chromium critical workflows 19/19, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, the focused authorized-Manager Chromium regression passed 1/1 before `main` was pushed.
+- This slice changes only controlled E2E fixture/browser coverage; V1, Backend application source/contracts, production financial authority, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
 - Preserve V1 completely as the production fallback and keep V2 routes/configuration isolated. Do not redirect, replace, or retire V1 during this task.
@@ -1519,10 +1584,16 @@ Run the browser E2E suite with the normal developer server left running, plus Fr
 
 ### P3-14 — Keep the internal Artwork POC out of anonymous production access
 
-Status: OPEN  
+Status: DONE
 Area: Frontend / Auth boundary / Deployment hardening  
 Risk: Medium  
 Owner: Frontend
+
+Progress (2026-09-01):
+- Frontend commit `b133a80` is on `origin/main`. The existing Next.js auth proxy was moved from repository root to `src/proxy.ts`, matching the project’s `src/app` layout so Next.js 16 actually compiles the intended proxy boundary; `/artwork-poc` was then added to the protected prefixes and matcher.
+- Anonymous `/artwork-poc` now redirects to `/login?redirectTo=/artwork-poc`; authenticated cashier/staff test access returns to the POC through the normal admin-session flow. No production test bypass, Artwork UI redesign, Backend API, or public-customer-route policy change was introduced.
+- Focused Chromium Artwork/auth E2E passed 3/3 before integration and again on merged `main`. Frontend full tests passed 204/204, ESLint zero warnings, UTF-8 validation, production build/TypeScript, `npm audit` with 0 vulnerabilities, and `git diff --check` all passed before integration; merged `main` was rechecked with focused E2E 3/3, full tests 204/204, and ESLint before confirming `origin/main` at `b133a80`.
+- Runtime evidence from the failed first focused run showed the old root-level `proxy.ts` was not present in the Next.js middleware manifest. After relocating it under `src/`, production build output explicitly reports `ƒ Proxy (Middleware)` and the anonymous-route regression passes fail-closed.
 
 Fresh-scan evidence (2026-09-01):
 - Current Frontend `main` adds the deterministic `/artwork-poc` route in commit range `6ce9f36..4dd350a`.
