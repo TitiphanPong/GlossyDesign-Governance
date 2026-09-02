@@ -283,6 +283,23 @@ Owner decision:
 Impact:
 Runtime allocation, conversion transactions, reconciliation, and tax-invoice backfill tooling must resolve all periods from `202609` onward to the shared `202609` counter while retaining the actual invoice period on each Order. The existing September counter is reused, so no counter migration is required when this policy is deployed before a later monthly counter has issued numbers.
 
+### DEC-020 — Quotation numbering is monthly, issued on first Send, and revision-stable
+
+Status: Active
+Date: 2026-09-01
+
+Owner decision:
+- Quotation is a separate document domain and must not reuse Order, receipt, or tax-invoice numbering;
+- the issued Quotation number format is `QT-YYYYMM-0001` using the `Asia/Bangkok` business period;
+- the sequence resets each calendar month and is zero-padded to four digits;
+- Draft Quotations do not receive a real document number;
+- the Backend atomically allocates `quotationNumber` only on the first successful `DRAFT -> SENT` transition;
+- revisions retain the original `quotationNumber` and increment `revision` instead of allocating a new document number;
+- this policy does not create Quotation records for historical Orders and does not alter existing Order or tax-invoice identities.
+
+Impact:
+Quotation Phase 1 may implement a dedicated concurrency-safe quotation counter keyed by Bangkok `YYYYMM`, immutable issued snapshots/revisions, and independent print/conversion flows without reusing tax-invoice book/sequence logic.
+
 ## Needs Decision
 
 The previously tracked ND-001, ND-003, ND-005, ND-006, and ND-007 are resolved by DEC-010 through DEC-014 above. P2-31 is resolved by DEC-016. P2-38 final implementation approval is resolved by DEC-018; replacing/retiring Quick Seller V1 remains a separate future owner decision.
