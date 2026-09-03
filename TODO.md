@@ -1,9 +1,9 @@
 # GlossyDesign TODO
 
 Governance: V2  
-Last reviewed: 2026-09-01 (Asia/Bangkok)  
-Frontend baseline: `2d36e586f50eb2aa12cf43978727cc989b1a2834`  
-Backend baseline: `94a82b8178014b0f55696c3545e978d52556b4a7`
+Last reviewed: 2026-09-02 (Asia/Bangkok)  
+Frontend baseline: `c1445e6833c98b306090e64dd037b72af02550ec`  
+Backend baseline: `c50eb0d0164fdcacfb62def23ab59882974968f5`
 
 This is the only active execution backlog for Governance V2. Archived audits/plans are historical evidence only.
 
@@ -1216,6 +1216,12 @@ Progress (2026-09-02 — Quick Sale V2 cart-removal parity merged/pushed):
 - Verification passed before integration: Chromium critical workflows 15/15 including the new removal scenario, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding local `main`, the focused Chromium removal regression 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
 - This is test-only parity evidence; V1, Backend contracts/financial authority, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for remaining approved service-family/parity work and no cutover/retirement was performed.
 
+Progress (2026-09-02 — Quick Sale V2 manual-price RBAC parity merged/pushed):
+- Frontend commit `25a3f9d` is now on `origin/main`. The existing Quick Sale V2 Chromium flow now asserts that a `staff` cashier cannot see the `รายการอื่น / กำหนดราคาเอง` action, preserving the existing Manager/Admin-only manual/custom price capability while the document-family V2 path remains usable.
+- The first isolated worktree was correctly rejected for integration because it inherited unrelated Quotation branch ancestry; only the one-line task commit was cherry-picked onto a clean branch based on `main`, verified, fast-forward merged, and pushed, so Quotation history/WIP did not enter `main`.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8 through production build, production build/TypeScript, `npm audit` 0 vulnerabilities, and task-scoped `git diff --check`. After merging cleanly to local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This slice is regression-only and does not weaken Backend price-override authorization, alter V1, or change financial calculations. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
 Progress (2026-09-02 — Quick Sale V2 Scan mapping parity merged/pushed):
 - Frontend commit `8c190b5` is now on `origin/main`. The controlled Quick Sale V2 fixture now publishes an explicit A4 B&W Scan mapping to `product-e2e-a4-scan`; Chromium verifies the configurator resolves the Scan SKU at ฿8.00, adds it to cart, completes the shared cash checkout, and submits the exact `quickProductId` with an authoritative ฿8.00 payment fact.
 - The existing fail-closed mapping regression remains intact by exercising the still-unmapped Copy + A3 combination before returning to a valid mapping, so adding Scan coverage does not weaken the rule that unknown combinations cannot silently guess another SKU.
@@ -1239,6 +1245,11 @@ Progress (2026-09-02 — Quick Sale V2 authorized manual-price RBAC parity merge
 - The Order-create payload is asserted with `customName = ค่าออกแบบ E2E`, quantity 2, and `priceOverride = { unitPrice: 37.5, reason: quick_sale_custom_item }`, confirming V2 reuses the existing explicit price-override contract rather than creating a second pricing path or weakening server authority. The earlier staff-denial regression remains in the same critical workflow suite.
 - Verification passed before integration: focused Chromium 1/1, full Chromium critical workflows 19/19, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, the focused authorized-Manager Chromium regression passed 1/1 before `main` was pushed.
 - This slice changes only controlled E2E fixture/browser coverage; V1, Backend application source/contracts, production financial authority, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader service-family expansion and remaining parity work; V1 cutover remains separately owner-gated.
+
+Progress (2026-09-02 — historical QuickProduct identity/readability parity merged/pushed):
+- Frontend commit `30788dc` is now on `origin/main`. The controlled historical Orders fixture retains an existing `quickProductId = product-e2e-historical-1`, and Chromium verifies the same historical Order remains readable at `/home/orders` with `ORD-E2E-0001` and its original line description while the API response preserves that QuickProduct identity unchanged.
+- Verification passed before integration: focused Chromium 1/1, Frontend Node tests 204/204, ESLint zero warnings, UTF-8, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. After fast-forwarding clean local `main`, focused Chromium 1/1, Node tests 204/204, and ESLint passed again before pushing `main`.
+- This slice changes only controlled E2E fixture/browser coverage; V1, Backend application source/contracts, catalog/order data, and unrelated Quotation WIP were not changed. P2-38 remains `IN_PROGRESS` for broader approved service-family expansion; V1 cutover/retirement remains separately owner-gated.
 
 Owner implementation approval (2026-09-01, DEC-018):
 - The owner explicitly approved starting implementation now and will refine visual/UI details after a functional V2 pilot exists; the previous final-mockup blocker is resolved.
@@ -1331,6 +1342,75 @@ Definition of Done after implementation:
 Implementation gate resolved (2026-09-01):
 - DEC-018 records explicit owner approval to implement the functional parallel V2 pilot now and defer pixel-level visual refinement until after a usable flow exists.
 - Remaining cutover/retirement of V1 is still separately decision-gated and is not part of this implementation.
+
+### P2-39 — Preserve Order-created operational side effects when converting a Quotation
+
+Status: DONE  
+Area: Backend / Quotations / Orders / Notifications / Realtime  
+Risk: Medium / Operational reliability
+
+Completion evidence (2026-09-02):
+- Backend commit `1ee98af` is merged and pushed to `origin/main`. Quotation conversion now publishes the converted Order to the shared `OrdersSseService` and evaluates `NotificationsService.handleOrderPaymentState()` only after the Mongo conversion transaction has committed and only for the first successful conversion.
+- Replay remains side-effect free: the existing `convertedOrderId` path returns the existing Order without re-emitting realtime or re-running the payment Action Center hook. The stable `payment_outstanding:<orderId>` notification identity remains unchanged.
+- Side-effect failures are isolated/logged after commit so they cannot roll back the committed Quotation→Order financial/document transaction or turn a committed conversion into a retryable transaction failure.
+- Verification passed before integration: Quotation unit 8/8; Mongo quotation transaction integration 4/4 including concurrent/replay exactly-once side-effect assertions and rollback zero-side-effect assertions; full Backend unit 256 passed / 20 skipped; E2E 37 passed / 2 skipped; ESLint; production build/TypeScript; `npm audit` 0 vulnerabilities; `git diff --check`. Post-merge `main` re-verification passed Quotation unit 8/8, Mongo quotation integration 4/4, ESLint, and build.
+
+Current evidence (2026-09-02 full scan):
+- `QuotationsService.convertToOrder()` creates and saves an `Order` directly inside the Quotation conversion transaction. The created Order starts as `awaiting_payment` with the full `grandTotal` outstanding.
+- The normal `OrdersService.create()` path emits the created Order through `OrdersSseService` and evaluates `NotificationsService.handleOrderPaymentState()` after persistence so Action Center can surface an outstanding-payment condition.
+- The Quotation conversion path does not call either Order-created side effect. Source search across `src/quotations` found no `emitOrderChanged`/Order SSE emission and no outstanding-payment/Action Center evaluation.
+- Conversion idempotency and Quotation→Order compare-and-swap behavior are otherwise present and must be preserved; this task is not permission to replace the transactional conversion with an unsafe second create path.
+
+Ownership / dependencies:
+- Owner: Backend.
+- Depends on the existing Quotation conversion transaction/idempotency contract and P2-10 Action Center semantics.
+- Do not touch: Backend-owned pricing/VAT truth, Quotation approval/price-conflict rules, the one-Quotation→one-Order transaction/CAS boundary, historical Orders, or conversion replay semantics.
+
+Acceptance:
+- A first successful Quotation→Order conversion produces the same required post-create operational state as an equivalent unpaid Order created through the normal Order service: the outstanding-payment Action Center condition is evaluated and realtime consumers receive the newly created Order/change signal.
+- A conversion replay returns the existing Order without creating duplicate notifications/events.
+- An aborted/failed transaction must not emit a committed-order event or create an Action Center fact for an Order that did not commit.
+- Side-effect failure handling is explicit and cannot roll back or duplicate the already committed financial/document transaction accidentally.
+
+Verification:
+- Add focused service/integration coverage for first conversion, idempotent replay, and failed/aborted conversion.
+- Assert exactly-once logical Action Center behavior and no duplicate realtime emission on replay.
+- Run Quotation + Orders + Notifications focused tests, Backend ESLint/build, and Mongo transaction coverage where the environment enables integration tests.
+
+### P2-40 — Bound Quotation revision storage growth without losing immutable history
+
+Status: DONE  
+Area: Backend / Quotations / Mongo persistence  
+Risk: Medium / Persistence reliability
+
+Completion evidence (2026-09-02):
+- Backend commit `3fc171a` is merged and pushed to `origin/main`. New immutable revision snapshots are stored in the separate `quotation_revisions` collection with a unique `{ quotationId, revision }` lineage key instead of being appended to the parent `Quotation.revisionHistory` array.
+- `revise()` writes the revision snapshot and parent revision/status transition in the same Mongo transaction, preserving DEC-020 quotation number/revision semantics while preventing new revisions from monotonically growing the parent document.
+- Existing quotations with legacy embedded `revisionHistory` remain readable without migration. Detail/revise responses merge legacy embedded snapshots with external revision records and return deterministic revision order; duplicate revision identities are deduplicated by revision.
+- Quotation create/update DTOs now cap `items` and per-item `sizeFlex` arrays at 250 entries so a single new request cannot create an unbounded array payload before persistence.
+- Verification passed before integration: focused Quotation/DTO tests 16/16, Mongo quotation integration 5/5 including parent-growth and legacy/external retrieval-order coverage, full Backend unit 257 passed / 21 skipped, E2E 37 passed / 2 skipped, ESLint, production build/TypeScript, `npm audit` 0 vulnerabilities, and `git diff --check`. Post-merge `main` verification passed focused 16/16, Mongo 5/5, ESLint, and build.
+- Frontend source search found no rendered consumer of `revisionHistory` beyond the shared Quotation response type, so the existing detail/print contract remains compatible and no Frontend source change was required.
+
+Current evidence (2026-09-02 full scan):
+- `Quotation.revisionHistory` embeds every prior `QuotationRevisionSnapshot` in the same Mongo document.
+- Each snapshot duplicates the full customer snapshot, full `items[]`, financial fields, notes and terms; `revise()` appends another full snapshot before incrementing the live revision.
+- `CreateQuotationDto.items` and the persisted `revisionHistory` currently have no explicit count/size bound or archival/offloading boundary. A repeatedly revised large quote therefore grows one parent document monotonically and amplifies every subsequent write.
+- Existing tests verify revision immutability/content but no large-quote/repeated-revision storage boundary was found.
+
+Ownership / dependencies:
+- Owner: Backend.
+- Depends on DEC-020 revision-stable quotation identity and the requirement to retain immutable historical revisions.
+- Do not touch: quotation number/revision semantics, historical snapshot fidelity, Backend financial authority, or existing issued Quotation identities.
+
+Acceptance:
+- Define and enforce a persistence model that prevents one Quotation parent document from growing without a deterministic bound while preserving complete immutable revision lineage.
+- If snapshots remain embedded, enforce explicit safe item/revision/payload limits with clear API errors before persistence limits are approached; if snapshots move to a separate collection, preserve ordered retrieval and atomic version lineage.
+- Existing quotations/revisions remain readable without destructive rewrite.
+- API/print/history consumers can still retrieve the correct revision content.
+
+Verification:
+- Add focused boundary tests with large item sets and repeated revisions, including the rejection/offloading threshold and revision retrieval order.
+- Run Quotation unit tests, enabled Mongo integration coverage, Backend ESLint/build, and verify no FE↔BE history/print contract regression.
 
 ## P3 — Low (14)
 
