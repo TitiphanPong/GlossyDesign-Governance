@@ -1137,9 +1137,15 @@ Acceptance:
 
 ### P2-38 — Implement a parallel Quick Seller V2 + Settings V2 around service families
 
-Status: IN_PROGRESS  
+Status: CANCELLED
 Area: Frontend + Backend / Quick Seller / Quick Seller Settings / UX  
 Risk: Medium / Cashier speed and configuration correctness
+
+Owner direction (2026-09-08 — removed from active plan):
+- Stop further Quick Seller V2 / Settings V2 roadmap work. The TODO Runner and Project Scanner must not resume or extend P2-38 unless the owner explicitly reopens it.
+- Remove the V2 sales/settings entries from application navigation and keep the current Quick Seller V1 + current settings as the active user-facing workflow.
+- Preserve the already implemented V2 source/routes/configuration as dormant rollback/history evidence for now; this cancellation does not authorize source deletion, data migration, or cleanup of V2 persistence.
+- Historical progress notes below are retained only as implementation evidence and do not make P2-38 actionable.
 
 Progress (2026-09-01 — functional document-family pilot merged/pushed):
 - Frontend commit `f8261f7` is now on `origin/main`: parallel `/home/quick-sale-v2`, document configurator, explicit published mapping resolution, isolated `/home/settings/quick-sale-v2`, V1 regression/navigation coverage, and the existing V1 production route remains intact.

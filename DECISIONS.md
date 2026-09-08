@@ -238,7 +238,7 @@ P2-31 is closed by product-scope decision with no Frontend/Backend application-s
 
 ### DEC-017 — Quick Seller V2 is a parallel pilot and cannot replace V1 implicitly
 
-Status: Active
+Status: Superseded by DEC-021
 Date: 2026-09-01
 
 Owner decision:
@@ -253,7 +253,7 @@ P2-38 remains review/owner-gated planning work, but its migration boundary is no
 
 ### DEC-018 — Quick Seller V2 implementation may start functional-first before final visual polish
 
-Status: Active
+Status: Superseded by DEC-021
 Date: 2026-09-01
 
 Owner decision:
@@ -300,6 +300,20 @@ Owner decision:
 Impact:
 Quotation Phase 1 may implement a dedicated concurrency-safe quotation counter keyed by Bangkok `YYYYMM`, immutable issued snapshots/revisions, and independent print/conversion flows without reusing tax-invoice book/sequence logic.
 
+### DEC-021 — Retire Quick Seller V2 from the active roadmap and navigation
+
+Status: Active
+Date: 2026-09-08
+
+Owner decision:
+- P2-38 is cancelled and Quick Seller V2 / Settings V2 are removed from the active product roadmap. The TODO Runner and Project Scanner must not resume, extend, or recreate this V2 initiative unless the owner explicitly reopens it.
+- Remove the V2 sales entry `/home/quick-sale-v2` and the V2 settings entry `/home/settings/quick-sale-v2` from application navigation.
+- Keep the current production Quick Seller `/home/quick-sale` and current settings `/home/settings/quick-menu` as the active user-facing workflow.
+- Preserve already implemented V2 source, routes, API/configuration, and historical Git evidence as dormant rollback/reference material for now. This decision does not authorize deleting V2 source or migrating/removing V2 data.
+
+Impact:
+DEC-017 and DEC-018 are superseded. P2-38 is non-actionable and removed from active planning while the V2 implementation remains hidden from normal navigation.
+
 ## Needs Decision
 
-The previously tracked ND-001, ND-003, ND-005, ND-006, and ND-007 are resolved by DEC-010 through DEC-014 above. P2-31 is resolved by DEC-016. P2-38 final implementation approval is resolved by DEC-018; replacing/retiring Quick Seller V1 remains a separate future owner decision.
+The previously tracked ND-001, ND-003, ND-005, ND-006, and ND-007 are resolved by DEC-010 through DEC-014 above. P2-31 is resolved by DEC-016. P2-38 is cancelled by DEC-021 and must not be reopened without a new explicit owner decision.
