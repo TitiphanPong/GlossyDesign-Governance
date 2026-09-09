@@ -314,6 +314,23 @@ Owner decision:
 Impact:
 DEC-017 and DEC-018 are superseded. P2-38 is non-actionable and removed from active planning while the V2 implementation remains hidden from normal navigation.
 
+### DEC-022 — GlossyDesign visual identity uses Paper + Ink + Cyan with restrained print accents
+
+Status: Active
+Date: 2026-09-10
+
+Owner decision:
+- Adopt `Modern Editorial Print` as the long-term GlossyDesign visual direction across Brand/Marketing, Application/Admin, POS/Upload, and Customer Display surfaces.
+- The durable identity is `Paper → Ink → Cyan → restrained Print Accents`: Ink `#111318`, Paper `#F7F4ED`, Glossy Brand Cyan `#00A9CE`, with the darker `#007F96` family used for accessible operational primary actions where stronger contrast is required.
+- Application/Admin uses a very light warm-neutral page canvas, white primary surfaces, Ink typography, Cyan primary actions, neutral secondary actions, and semantic Green/Amber/Red/Info only for actual success/warning/error/info meaning.
+- CMYK-inspired Magenta/Yellow/Violet are restrained brand/decorative accents for print/artwork moments, not alternate operational primary-action families.
+- Customer Display is a dark/high-contrast expression of the same system rather than a separate product theme: dark Ink shell, Cyan focus, high-contrast information surfaces, success Mint/Green, and restrained Violet secondary accents.
+- Implement from `Role → Semantic Token → Color Value`. Maintain one semantic token source that feeds current MUI/CSS infrastructure; migrate shared primitives before page-by-page cleanup and never mass-replace raw color literals without classifying their role.
+- Preserve functional status semantics, accessibility/contrast, responsive behavior, business logic, and Backend authority. P2-41 implementation is phased and must use representative visual regression checks before broad rollout.
+
+Impact:
+P2-41 is approved for implementation and may leave `REVIEW`. The first slice should establish semantic tokens and the shared Application/Admin kernel; Landing, Login, Upload, individual Admin surfaces, POS, and Customer Display migrate in bounded follow-up phases rather than through a repository-wide color replacement.
+
 ## Needs Decision
 
 The previously tracked ND-001, ND-003, ND-005, ND-006, and ND-007 are resolved by DEC-010 through DEC-014 above. P2-31 is resolved by DEC-016. P2-38 is cancelled by DEC-021 and must not be reopened without a new explicit owner decision.

@@ -346,7 +346,7 @@ Completion evidence (2026-08-31):
 - Multi-job coverage proves one ready sibling cannot advance the Order, all ready-or-later siblings aggregate `ready` at the last readiness timestamp, and no Production Job preserves the existing Order workflow behavior.
 - Verification passed: Backend unit 197/197 (15 skipped integration tests unchanged), E2E 37/37, ESLint, TypeScript build, `git diff --check`, and `npm audit` with 0 vulnerabilities; the same unit/E2E/lint/build suite passed again on merged `main`.
 
-## P2 — Medium (38)
+## P2 — Medium (39)
 
 ### P2-01 — Define and enforce the backdate policy
 
@@ -1417,6 +1417,85 @@ Acceptance:
 Verification:
 - Add focused boundary tests with large item sets and repeated revisions, including the rejection/offloading threshold and revision retrieval order.
 - Run Quotation unit tests, enabled Mongo integration coverage, Backend ESLint/build, and verify no FE↔BE history/print contract regression.
+
+### P2-41 — Define a unified GlossyDesign Color System and Visual Color Direction
+
+Status: IN_PROGRESS  
+Area: Frontend / Design System / Theme / Shared UI / Public / POS / Customer Display  
+Risk: Medium / Broad visual blast radius  
+Owner: Frontend + Design  
+
+Owner approval resolved (2026-09-10):
+- The owner explicitly approved the source-backed `Modern Editorial Print` direction and implementation scope discussed in chat, resolving the previous `REVIEW` gate.
+- Durable identity: `Paper → Ink → Cyan → restrained Print Accents`. Use `#111318` Ink and `#F7F4ED` Paper as the brand foundation, `#00A9CE` as Glossy Brand Cyan, and the darker `#007F96` family for accessible operational primary actions.
+- Application surfaces use a very light warm-neutral canvas, white primary surfaces, Ink text, Cyan primary actions, neutral secondary actions, and semantic Green/Amber/Red/Info only for their real meanings.
+- CMYK-inspired Magenta/Yellow/Violet remain restrained brand/decorative accents and must not become competing operational action colors.
+- Customer Display is the dark expression of the same system: Ink/dark shell, Cyan focal highlight, high-contrast information surfaces, Mint/Green success, and restrained Violet secondary accent.
+- Initial implementation is intentionally bounded to semantic token foundation plus shared MUI/CSS/Admin application primitives before page-by-page migration. No blind hex replacement, Backend change, financial/business-logic change, historical-document mutation, or layout redesign is authorized by this approval.
+- P2-41 remains `IN_PROGRESS` across phased migration and visual regression work; completing the first token/shared-kernel slice alone does not imply that every public/admin/POS/display surface has been migrated.
+
+Phase 1 implementation progress (2026-09-10):
+- Frontend feature commit `a16677a` established `src/theme/glossy-design-tokens.ts` as the canonical semantic source for Brand, Surface, Text, Border, Action, and Status roles, with CSS variables derived from the same source.
+- MUI `appTheme`, `AppThemeProvider`, Sidebar tokens, shared Admin table/surface primitives, and shared Dashboard empty/loading states now derive their application colors from the canonical tokens instead of maintaining separate Blue/Indigo/Purple families in those shared kernels.
+- The approved Brand Cyan remains `#00A9CE`; operational primary is intentionally the distinct accessible `#007F96` semantic action color. Status semantics were not mass-replaced.
+- Verification passed before integration: full Frontend tests, ESLint zero-warning, `npx tsc --noEmit`, UTF-8 validation, production Next.js build including TypeScript/static-page generation, and final diff review with no findings.
+- Merged and pushed to Frontend `main` at `cb0731e`. No Backend or financial/business-logic files changed.
+- Remaining P2-41 work is intentionally phased: migrate major Admin surfaces and remaining shared literals, then Login + Upload, Customer Display/Dark expression, representative visual regression checks, and final legacy-color cleanup. Do not mark P2-41 `DONE` until those approved rollout phases and verification are complete.
+
+Objective:
+- Audit the real Frontend source and define one long-term color architecture for the whole GlossyDesign product family while allowing distinct personalities for Brand/Marketing, Application/Admin, and Display/Dark surfaces.
+- The working design hypothesis is `Warm Editorial Print + Cyan` / `Modern Print Studio`: warm paper + ink + Glossy Cyan, with restrained CMYK-inspired accents rather than a generic blue SaaS palette or rainbow CMYK UI.
+- Final recommendations must be evidence-based from current source, not accepted from the hypothesis without verification.
+
+Planning scope before any implementation:
+- Read `AGENTS.md`, `PROJECT_RULES.md`, `DECISIONS.md`, `WORKFLOW.md`, `$glossy-pos` / `glossy-pos-ui`, current theme/UI conventions, and inspect current Git/WIP without mutating application source.
+- Audit MUI Theme/ThemeProvider, palette, `globals.css`, CSS variables, `adminUi.ts`, `dashboardUi`, `AdminSectionHero`, `AdminPageContainer`, Sidebar, Header/Navigation, Button, Card/Paper, Chip/Badge, Dialog, forms, search/filter controls, and loading/empty/error states.
+- Inspect color usage in `sx`, CSS/CSS modules, Tailwind arbitrary values, inline styles, gradients, rgba/hex literals, and status mappings.
+- Cover at minimum: Landing/Public, Login, Admin/Backoffice, Dashboard, Orders, Reports, Quotation, Tax Invoice/Receipt, POS Cashier, Customer POS/Display, Public Upload, and Shared UI Components.
+- Identify normalized color families, representative values, semantic roles, duplicate shades, drift, hard-coded colors, semantic misuse, and layer/surface hierarchy problems.
+- Evaluate accessibility/contrast for text, buttons, chips, form borders, focus states, disabled states, status colors, responsive/mobile states, and long-distance Customer Display readability.
+
+Design direction to evaluate:
+- Mode A — Brand/Marketing: paper/warm neutral background, ink typography, Cyan brand accent, subtle print-inspired/CMYK decoration only.
+- Mode B — Application: calm, professional, dense-information friendly; warm neutral page, white surfaces, ink text, Cyan primary actions, neutral secondary actions, semantic colors reserved for actual status meaning.
+- Mode C — Display/Dark: dark/ink background, Cyan main highlight, Mint success/paid, Violet secondary accent, light information surfaces; treated as a Glossy dark mode, not a separate product theme.
+- Upload should bridge Brand + Application: paper/light neutral page, white form surface, ink text, Cyan CTA, soft interactive state, Green success, mobile-first usability.
+
+Color-system principles:
+- Design from `Role → Semantic Token → Color Value`, not from hex first.
+- Avoid competing primary-action families such as Blue + Indigo + Cyan + Violet inside the same Application surface.
+- Reserve Green for success, Amber for warning, Red for error/destructive, and Info for an intentional info semantic.
+- CMYK-inspired colors are brand accents for decoration, artwork/print indicators, empty states, and small brand moments; they are not the primary operational UI palette.
+- Define a bounded surface hierarchy (for example Page → Card/Section → Interactive/Elevated) and avoid adding near-identical layers merely to fill space, especially in Invoice, Reports, and Admin content areas.
+
+Expected planning deliverable:
+1. Executive Summary.
+2. Current Color Audit table by family / representative colors / usage / role / problem.
+3. Surface Personality comparison across major product surfaces.
+4. One clearly recommended Brand Direction, with at most two alternatives only if materially justified.
+5. Proposed Palette separated into Brand, Surface, Text, Border, Action, Semantic, and Display/Dark tokens, including contrast considerations.
+6. Color Usage Rules and semantic restrictions.
+7. Surface Mapping for Landing, Login, Admin, POS, Upload, and Customer Display.
+8. Token Architecture compatible with current MUI + CSS + Tailwind infrastructure without creating parallel design systems.
+9. Phased Migration Plan based on real source dependencies.
+10. Risk / Blast Radius and components/tokens that must not be mass-replaced.
+11. Visual Verification Plan using representative screenshots for Landing, Login, Dashboard, Orders, Reports, Quotation, Tax Invoice, POS Cashier, Upload, and Customer Display across appropriate desktop/mobile/TV contexts.
+12. Final Recommendation defining the one GlossyDesign color identity: primary brand color, base background, primary text, accent strategy, Admin strategy, Display strategy, CMYK strategy, and 3–5 durable design principles.
+
+Implementation boundary after planning approval:
+- Any later implementation must reuse existing theme/shared-component infrastructure where practical, centralize semantic tokens before broad screen edits, migrate shared components before page-by-page cleanup, and use visual regression verification on representative screens.
+- Do not mass replace raw colors blindly. Preserve functional semantic/status differences and existing business behavior.
+- No Backend change is expected unless a future explicitly approved implementation discovers a real cross-boundary requirement.
+
+Do not touch while this item remains `REVIEW`:
+- Frontend source/theme files, layout, business logic, Backend, migrations, historical documents, or production configuration.
+- Do not commit/push/merge application changes for this item before explicit owner approval.
+
+Verification for the planning phase:
+- Evidence must come from current source and current UI/theme architecture.
+- Clearly separate source evidence from the owner design hypothesis.
+- Record contradictions where current source does not support the hypothesis.
+- No code/test/build requirement until implementation is explicitly approved.
 
 ## P3 — Low (14)
 
