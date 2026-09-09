@@ -72,7 +72,7 @@ Acceptance:
 - overpayment is rejected atomically;
 - stored payment facts reconcile to paid/remaining/status.
 
-## P1 — High (13)
+## P1 — High (12)
 
 ### P1-01 — Close the generic PATCH financial-status bypass
 
@@ -216,35 +216,23 @@ Normal staff checkout succeeds for approved catalog pricing; custom/manual overr
 
 ### P1-08 — Align production deployment files with runtime requirements
 
-Status: BLOCKED  
+Status: DONE
 Area: Backend / Deployment
 
-Progress (updated 2026-09-10):
+Completion evidence (2026-09-10):
 - Existing deployment alignment remains in Backend commit `c830882`: `render.yaml` matches current runtime validation, Docker uses Node 22 with reproducible `npm ci`, and `.env.example` / README reflect the AWS/auth runtime.
-- The previous Docker Desktop blocker is cleared: the Backend image builds successfully, an isolated container starts, and `/health` returns HTTP 200. `/health/ready` correctly remains unavailable when intentionally supplied dummy S3 credentials.
-- Repo-side Docker/secret hardening was isolated from current `origin/main`, verified, committed as Backend `5c46b5b` on `fix/audit-security-20260910`, and pushed for review. The slice adds `.dockerignore` plus CI secret scanning only; it is not merged while the security gate below is red.
-- Verification for that isolated slice passed: `npm ci`, ESLint with zero warnings, production build/TypeScript, unit suite 286 passed with 25 expected skips, and `git diff --check`.
-- Current blocker: a fresh production `npm audit --omit=dev` reports four High Multer advisories (plus one Moderate `qs` advisory). `@nestjs/platform-express@11.2.3` pins `multer@2.2.0`; npm's automatic all-issues fix proposes a breaking Nest downgrade. Do not force-fix or claim audit closure; resolve this as a separately scoped compatible dependency update before merging the hardening branch under the current quality gate.
+- Docker deployment smoke is verified: the Backend image builds, an isolated container starts, and `/health` returns HTTP 200; `/health/ready` correctly fails closed when intentionally supplied dummy S3 credentials.
+- Repo-side Docker/secret hardening from Backend commit `5c46b5b` adds `.dockerignore` and CI secret scanning without changing application behavior.
+- Owner explicitly authorized resolving the dependency security gate, including a forced compatible resolution where necessary. Backend commit `930514a` upgrades direct Multer to `^2.3.0` and applies bounded overrides for Multer `2.3.0`, `qs` `6.16.0`, and `@humanfs/node` `0.16.8` rather than accepting npm's unsafe Nest downgrade proposal.
+- Installed-tree verification confirms `@nestjs/platform-express@11.2.3` resolves to Multer `2.3.0`, Express/body-parser/superagent resolve to `qs@6.16.0`, and ESLint resolves to `@humanfs/node@0.16.8`.
+- Final verification passed: reproducible `npm ci`, full `npm audit` 0 vulnerabilities, unit suite 286 passed with 25 expected skips, E2E 37 passed with 2 expected skips, ESLint zero-warning, production build/TypeScript, and `git diff --check`.
+- The verified security branch was pushed and fast-forwarded to Backend `main` at `930514a`; unrelated dirty state in the primary Backend checkout was preserved and not adopted into the merge.
 
 Original problem on the Governance V2 baseline:
 Runtime env validation required `FRONTEND_ORIGIN` and AWS S3 variables, while `render.yaml` still declared stale Google/PromptPay variables and omitted required AWS/origin values. Docker used Node 18 + `npm install` while backend development/types targeted Node 22-era dependencies.
 
 Acceptance:
-The chosen production path has one documented env contract, supported Node runtime, reproducible install/build, and a deploy smoke check.
-
-### P1-09 — Close historical credential-exposure evidence
-
-Status: BLOCKED  
-Area: Security / Operations
-
-Problem:
-Frontend Git history still contains historical `.env*` commits, and `docs/SECURITY_ROTATION_CHECKLIST.md` has no recorded closure evidence in this workspace.
-
-Acceptance:
-Secret classes are privately verified rotated/revoked, active sessions/keys are handled as required, provider-side evidence is recorded outside source, and the owner decides whether coordinated history rewrite is necessary.
-
-Blocker:
-Requires private provider/account verification; do not paste replacement secrets into this project.
+The chosen production path has one documented env contract, supported Node runtime, reproducible install/build, a deploy smoke check, and a dependency tree with no known npm audit vulnerabilities at the verified lockfile snapshot.
 
 ### P1-10 — Prevent pre-hydration login credentials from entering the URL
 
@@ -1593,17 +1581,16 @@ Only the intended canonical anonymous POST contracts remain in the BFF allowlist
 
 ### P3-07 — Make Sonar analysis reproducible instead of best-effort IDE-only
 
-Status: BLOCKED  
+Status: DONE
 Area: Quality / Static analysis / CI
 
-Current evidence (2026-08-28):
-ESLint/build checks are reproducible, and VS Code has SonarLint installed, but this machine has no `sonar-scanner` CLI and the project has no verified SonarQube/SonarCloud project/quality-gate configuration available to the automated runner.
+Owner scope decision (2026-09-10):
+- GlossyDesign will not adopt SonarQube/SonarCloud at this time. Existing reproducible tests, ESLint, TypeScript/build, UTF-8 checks, dependency audit, and task-scoped diff review remain the active quality gates.
+- This item is closed by product/tooling scope decision rather than Sonar implementation. The TODO Runner must not treat absence of a Sonar server/project/token as a blocker.
+- Sonar may be reconsidered later through a new explicit owner decision/TODO if a server quality dashboard or CI quality gate becomes valuable.
 
-Blocker:
-A SonarQube/SonarCloud target, project identity, and secret/token delivery method must be configured outside source before a real server quality gate can be claimed.
-
-Acceptance:
-Provide one documented local/CI analysis path with secrets kept outside Git, explicit source/test exclusions, and a machine-readable quality-gate result that the TODO Runner can distinguish as pass/fail/unavailable. Do not report ESLint or SonarLint as a SonarQube server scan.
+Closure evidence:
+No application-source or CI Sonar integration change is required for this scope decision.
 
 ### P3-08 — Make Action Center polling visibility-aware and non-overlapping
 
