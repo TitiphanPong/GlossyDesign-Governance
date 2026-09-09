@@ -219,12 +219,12 @@ Normal staff checkout succeeds for approved catalog pricing; custom/manual overr
 Status: BLOCKED  
 Area: Backend / Deployment
 
-Progress (2026-08-27):
-- Pushed in Backend commit `c830882`.
-- `render.yaml` now declares the env contract required by current validation instead of stale Google/PromptPay deployment variables.
-- Docker runtime moved to Node 22 and reproducible `npm ci`; `.env.example` and README were aligned with the current AWS/auth runtime.
-- Backend dependency audit was reduced from 31 advisories to 0 using compatible updates plus a scoped safe transitive override; unit/E2E/lint/build all pass.
-- Blocker: local Docker Desktop engine returned API 500, so an actual image build/deploy smoke check could not be completed on this machine.
+Progress (updated 2026-09-10):
+- Existing deployment alignment remains in Backend commit `c830882`: `render.yaml` matches current runtime validation, Docker uses Node 22 with reproducible `npm ci`, and `.env.example` / README reflect the AWS/auth runtime.
+- The previous Docker Desktop blocker is cleared: the Backend image builds successfully, an isolated container starts, and `/health` returns HTTP 200. `/health/ready` correctly remains unavailable when intentionally supplied dummy S3 credentials.
+- Repo-side Docker/secret hardening was isolated from current `origin/main`, verified, committed as Backend `5c46b5b` on `fix/audit-security-20260910`, and pushed for review. The slice adds `.dockerignore` plus CI secret scanning only; it is not merged while the security gate below is red.
+- Verification for that isolated slice passed: `npm ci`, ESLint with zero warnings, production build/TypeScript, unit suite 286 passed with 25 expected skips, and `git diff --check`.
+- Current blocker: a fresh production `npm audit --omit=dev` reports four High Multer advisories (plus one Moderate `qs` advisory). `@nestjs/platform-express@11.2.3` pins `multer@2.2.0`; npm's automatic all-issues fix proposes a breaking Nest downgrade. Do not force-fix or claim audit closure; resolve this as a separately scoped compatible dependency update before merging the hardening branch under the current quality gate.
 
 Original problem on the Governance V2 baseline:
 Runtime env validation required `FRONTEND_ORIGIN` and AWS S3 variables, while `render.yaml` still declared stale Google/PromptPay variables and omitted required AWS/origin values. Docker used Node 18 + `npm install` while backend development/types targeted Node 22-era dependencies.
