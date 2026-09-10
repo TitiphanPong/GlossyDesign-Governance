@@ -132,9 +132,10 @@ For the Glossy Design ChatGPT Project only, every fresh `ทำต่อ` / `con
 
 1. Read `AGENTS.md`, `PROJECT_RULES.md`, `DECISIONS.md`, workspace-root `TODO.md`, and `docs/SCHEDULE_CONTINUATION_CONTEXT.md`.
 2. Inspect active durable goals, phase/pending-step truth, blockers, tracked tasks, and lease/worker liveness.
-3. Inspect Native ChatGPT Scheduled Task state and classify continuation health. Historical/disabled/Complete one-time tasks do not count as future coverage.
-4. Resume a safe actionable `IN_PROGRESS` phase first; otherwise select the next safe approved `OPEN` phase/TODO.
-5. Acquire the relevant durable goal lease before mutation; if another healthy worker owns it, do not compete.
+3. Inspect Native ChatGPT Scheduled Task state and classify continuation health. Historical/disabled/Complete one-time tasks and the currently firing one-time task do not count as future coverage.
+4. If safe actionable work remains, establish and host-verify the Native ChatGPT rolling continuation runway before mutation or long-running work: maintain three future enabled one-time tickets plus the separate hourly orchestration-only recovery watchdog. Seed/recover an empty runway at approximately +5, +15, and +30 minutes; on ordinary wakes preserve existing future tickets and replace only consumed/missing capacity with a new ticket beyond the current furthest future ticket. Do not recreate all three offsets from every wake. Deliberate three-ticket redundancy is not a duplicate error.
+5. Resume a safe actionable `IN_PROGRESS` phase first; otherwise select the next safe approved `OPEN` phase/TODO.
+6. Acquire/resume the relevant durable goal with lnwjud scheduled continuation disabled for this one-time-runway policy before mutation; if another healthy worker owns it, do not compete. A wake may repair schedule coverage but must not mutate project source/state without the lease.
 
 This bootstrap is workspace-specific and must not be reused automatically for unrelated projects. `docs/SCHEDULE_CONTINUATION_CONTEXT.md` explains incidents and diagnostics; only rules promoted into active governance are normative.
 
@@ -145,8 +146,10 @@ This bootstrap is workspace-specific and must not be reused automatically for un
 - Do not return `NO_ACTIONABLE_TASK` while an `IN_PROGRESS` TODO has a required safe approved `OPEN`/`IN_PROGRESS` phase. If every higher-priority task/phase is `DONE`, `BLOCKED`, `REVIEW`, `SKIPPED` with approved reason, or requires an unresolved business/policy decision, continue to the next safe actionable TODO. If none exists, report `NO_ACTIONABLE_TASK` rather than re-opening or repeatedly verifying gated work.
 - New review feedback or approval may make a `REVIEW` task actionable again; record the triggering evidence before resuming it.
 - A Native ChatGPT implementation wake should keep doing useful work through milestones, targeting roughly 20–25 minutes when the host/tool budget allows. A checkpoint is not itself a reason to stop.
-- If safe actionable work remains when the wake must end, checkpoint the exact phase/progress/next action/evidence and create exactly one new Native ChatGPT one-time successor for approximately +5 minutes. A fired one-time task may become `Complete`; the chain continues through the already-created successor until no safe actionable work remains or a genuine owner gate/blocker is reached.
-- Never use an hourly recurring implementation watchdog, Windows Task Scheduler, cron, shell timers, DOM automation, or a second local execution queue for this continuation chain. Never maintain more than one live successor for the same chain.
+- The continuation runway is pre-armed/top-upped at wake start rather than created only at wake end. If safe actionable work remains at the true turn boundary, checkpoint the exact phase/progress/next action/evidence and leave the verified runway in place. A fired one-time task may become `Complete`; remaining future runway tickets provide fault-tolerant coverage even if one wake fails to create another task.
+- The hourly recovery watchdog is allowed only as a read-only orchestration safety net. It may detect `RUNWAY_DEGRADED`/`CHAIN_BROKEN` and create missing Native one-time runway tickets, but it must never implement TODO work, edit application source, or compete for an implementation lease.
+- When all safe actionable work becomes terminal during the wake, or only `BLOCKED`/`REVIEW`/Needs Decision/approval-gated work remains, make every future runway ticket and the recovery watchdog non-runnable and verify cleanup through the Native ChatGPT host before considering continuation stopped.
+- Never use an hourly recurring **implementation** watchdog, Windows Task Scheduler, cron, shell timers, DOM automation, or a second local execution queue. The only permitted recurring task in this design is the Native ChatGPT orchestration-only recovery watchdog defined above.
 
 ## Verification guidance
 
