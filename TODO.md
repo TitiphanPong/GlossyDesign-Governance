@@ -1436,6 +1436,13 @@ Phase 2 implementation progress (2026-09-10):
 - Verification passed: Frontend tests 247/247, ESLint zero-warning, UTF-8 validation, production Next.js build including TypeScript/static generation, sequential `npx tsc --noEmit`, `git diff --check`, and task-scoped diff review. An earlier parallel standalone TypeScript run failed only because `next build` was concurrently regenerating `.next/types`; the required sequential rerun after build passed.
 - P2-41 remains `IN_PROGRESS`. Next approved phase is Login + Public Upload, followed by Customer Display/Dark expression, representative visual regression, and final legacy-color cleanup.
 
+Phase 3 implementation progress (2026-09-10):
+- Frontend commit `5f1e976` migrates Login and the shared Public Upload surface (`/upload` and `/upload/line`) from legacy slate/indigo/violet operational colors to the canonical Glossy semantic CSS variables while preserving authentication, upload limits, LINE flow, responsive behavior, and success/warning/error meanings.
+- Canonical CSS-variable exposure was expanded from `glossy-design-tokens.ts`, including surface overlay/inverse, text, border, action, status, and restrained brand accent roles; token tests lock representative mappings to the same source of truth.
+- Public Upload now uses Cyan/Ink/Paper for operational UI, keeps Green/Amber/Red for real status semantics, and uses restrained Cyan/Magenta/Yellow only as decorative brand accents.
+- Verification passed before integration: Frontend tests 247/247, ESLint zero-warning, sequential `npx tsc --noEmit`, UTF-8 validation, production Next.js build including TypeScript/static generation, `git diff --check`, and task-scoped diff review.
+- The verified feature was fast-forward merged and pushed to Frontend `main` at `5f1e976`. P2-41 remains `IN_PROGRESS`; next approved phase is Customer Display/Dark expression, followed by representative visual regression and final legacy-color cleanup.
+
 Objective:
 - Audit the real Frontend source and define one long-term color architecture for the whole GlossyDesign product family while allowing distinct personalities for Brand/Marketing, Application/Admin, and Display/Dark surfaces.
 - The working design hypothesis is `Warm Editorial Print + Cyan` / `Modern Print Studio`: warm paper + ink + Glossy Cyan, with restrained CMYK-inspired accents rather than a generic blue SaaS palette or rainbow CMYK UI.
