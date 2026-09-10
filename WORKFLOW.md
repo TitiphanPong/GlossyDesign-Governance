@@ -44,7 +44,7 @@ Responsibilities:
 11. **Push / PR** — according to risk/task instruction.
 12. **Update TODO** — move status and remove completed work from the active queue after durable evidence exists.
 
-## Task sizing
+## Task sizing and phases
 
 Bad:
 
@@ -54,19 +54,39 @@ Good:
 
 > P0-01A — Make `addPayment()` atomic without changing the existing successful response shape.
 
+Classify executable implementation work by real scope/risk before choosing phases:
+
+- **Small** — 1–3 phases.
+- **Medium** — 4–7 phases.
+- **Large** — 8–15 phases.
+- If more than 15 meaningful phases are needed, split the work into smaller TODOs/epics.
+
+A phase is a coherent execution slice with an observable outcome, not a time-box label. Each required phase should record scope, status, acceptance/exit criteria, verification, completion evidence, and the next action/phase. Do not split work into ceremonial phases merely to hit a count.
+
 A good task specification contains:
 
 ```text
 Task ID:
 Problem:
 Risk:
+Task size: Small | Medium | Large
 Scope:
 Expected files/area:
 Do not touch:
-Acceptance criteria:
-Verification:
+Phases:
+  Phase NN — title
+    Status:
+    Scope:
+    Acceptance / exit criteria:
+    Verification:
+    Evidence:
+    Next:
+Overall acceptance criteria:
+Overall verification:
 Git path:
 ```
+
+For resumable automation, the active phase is execution truth. Resume an actionable `IN_PROGRESS` phase before starting a later phase. A TODO is `DONE` only after all required phases are `DONE` or explicitly approved `SKIPPED`, required verification passes, and required Git integration is complete.
 
 ## Recommended risk levels
 
@@ -106,14 +126,27 @@ Allowed statuses:
 
 Use `DONE` only after required verification and durable commit/PR evidence. Periodically remove DONE items from active `TODO.md`; Git history and archived snapshots preserve history.
 
-### Automated runner selection rules
+### Automated runner selection and continuation rules
+
+For the Glossy Design ChatGPT Project only, every fresh `ทำต่อ` / `continue` / `resume` chat and every Native ChatGPT implementation continuation wake starts with the same bootstrap before selecting or mutating work:
+
+1. Read `AGENTS.md`, `PROJECT_RULES.md`, `DECISIONS.md`, workspace-root `TODO.md`, and `docs/SCHEDULE_CONTINUATION_CONTEXT.md`.
+2. Inspect active durable goals, phase/pending-step truth, blockers, tracked tasks, and lease/worker liveness.
+3. Inspect Native ChatGPT Scheduled Task state and classify continuation health. Historical/disabled/Complete one-time tasks do not count as future coverage.
+4. Resume a safe actionable `IN_PROGRESS` phase first; otherwise select the next safe approved `OPEN` phase/TODO.
+5. Acquire the relevant durable goal lease before mutation; if another healthy worker owns it, do not compete.
+
+This bootstrap is workspace-specific and must not be reused automatically for unrelated projects. `docs/SCHEDULE_CONTINUATION_CONTEXT.md` explains incidents and diagnostics; only rules promoted into active governance are normative.
 
 - `REVIEW` is a review-gated state, not active implementation work. Automated TODO runs must skip `REVIEW` tasks and select the next safe actionable task instead.
 - Do not modify source, add extra hardening/refactors, or re-run full verification for an unchanged `REVIEW` task unless there is new review feedback, explicit approval/instruction, a new test failure, or relevant branch/main changes.
 - Use branch/main SHA fingerprints as a repeat-work guard. If the review branch HEAD and relevant `main` SHA(s) are unchanged from the last recorded review evidence, treat that task as `SKIP_REVIEW_UNCHANGED` for automated selection.
-- An `IN_PROGRESS` task may be resumed only when there is actual unfinished implementation or verification work that can safely continue. Do not treat `REVIEW` as `IN_PROGRESS` merely because a feature branch still exists.
-- If every higher-priority item is `DONE`, `BLOCKED`, `REVIEW`, or requires an unresolved business/policy decision, continue to the next safe actionable TODO. If none exists, report `NO_ACTIONABLE_TASK` rather than re-opening or repeatedly verifying gated work.
+- An `IN_PROGRESS` task may be resumed only when there is actual unfinished implementation or verification work that can safely continue. For phased TODOs, inspect required phase status and resume the safe actionable `IN_PROGRESS` phase first; otherwise select the earliest/highest-priority safe required `OPEN` phase.
+- Do not return `NO_ACTIONABLE_TASK` while an `IN_PROGRESS` TODO has a required safe approved `OPEN`/`IN_PROGRESS` phase. If every higher-priority task/phase is `DONE`, `BLOCKED`, `REVIEW`, `SKIPPED` with approved reason, or requires an unresolved business/policy decision, continue to the next safe actionable TODO. If none exists, report `NO_ACTIONABLE_TASK` rather than re-opening or repeatedly verifying gated work.
 - New review feedback or approval may make a `REVIEW` task actionable again; record the triggering evidence before resuming it.
+- A Native ChatGPT implementation wake should keep doing useful work through milestones, targeting roughly 20–25 minutes when the host/tool budget allows. A checkpoint is not itself a reason to stop.
+- If safe actionable work remains when the wake must end, checkpoint the exact phase/progress/next action/evidence and create exactly one new Native ChatGPT one-time successor for approximately +5 minutes. A fired one-time task may become `Complete`; the chain continues through the already-created successor until no safe actionable work remains or a genuine owner gate/blocker is reached.
+- Never use an hourly recurring implementation watchdog, Windows Task Scheduler, cron, shell timers, DOM automation, or a second local execution queue for this continuation chain. Never maintain more than one live successor for the same chain.
 
 ## Verification guidance
 

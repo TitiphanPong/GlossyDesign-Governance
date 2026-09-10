@@ -34,6 +34,22 @@ The Frontend and Backend are separate Git repositories. The workspace root is cu
 
 If current source conflicts with an active decision/rule, do not silently reinterpret the rule. Report the conflict and implement only the assigned task.
 
+## Glossy Design ChatGPT Project bootstrap
+
+This bootstrap is scoped **only** to the ChatGPT Project / local workspace for Glossy Design (`C:\Users\User\Desktop\Work\glossy-design`). Do not apply or infer this startup contract for BumBum, snpro_time, CS2, or any unrelated project/workspace.
+
+When a new chat/wake in the Glossy Design project is asked to `ทำต่อ`, `continue`, `resume`, inspect status, or execute a Native ChatGPT Scheduled Task continuation, it must recover execution truth from the workspace instead of relying on chat memory. Before resuming implementation:
+
+1. Read `AGENTS.md`, `PROJECT_RULES.md`, `DECISIONS.md`, workspace-root `TODO.md`, and `docs/SCHEDULE_CONTINUATION_CONTEXT.md`. Read `WORKFLOW.md` when execution/verification/Git flow is relevant.
+2. Inspect active durable lnwjud goals, pending steps, blockers, tracked tasks, and lease/worker liveness.
+3. Inspect the Native ChatGPT Scheduled Task state for the Glossy implementation chain and classify it using the schedule-context diagnostics (`CHAIN_HEALTHY`, `CHAIN_BROKEN`, `CHAIN_DUPLICATE`, or `CHAIN_TERMINAL`).
+4. Treat workspace-root `TODO.md` and durable goal state as work truth; a Scheduled Task showing `Complete` is never sufficient evidence that a phase/TODO is complete.
+5. Resume the highest-priority safe actionable `IN_PROGRESS` phase first; otherwise continue the next safe approved `OPEN` phase/TODO.
+6. Before any workspace mutation, acquire/resume the relevant durable goal lease. Never create a competing worker for an already healthy lease owner.
+7. Repair missing continuation coverage only according to the approved Native ChatGPT scheduling rules. `docs/SCHEDULE_CONTINUATION_CONTEXT.md` is diagnostic/operational context; where it labels an item as a proposal, that proposal is not normative until promoted into `DECISIONS.md` / `PROJECT_RULES.md`.
+
+The intended user experience inside the Glossy Design ChatGPT Project is that a fresh chat can be given a short instruction such as `@lnwjud - Glossy ทำต่อ` and the worker reconstructs current execution state from these project files before acting.
+
 ## Before editing
 
 1. Read `PROJECT_RULES.md`.
@@ -57,6 +73,8 @@ If current source conflicts with an active decision/rule, do not silently reinte
 - Bug fixes should add a regression test when practical.
 - Cross-system changes must preserve or intentionally version the FE/BE API contract.
 - Never expose or copy real secrets into source, logs, prompts, docs, fixtures, or commits.
+- Before implementing an executable TODO, follow the task-size/phase rules in `PROJECT_RULES.md` and `WORKFLOW.md`. Resume the currently actionable `IN_PROGRESS` phase before starting another phase or TODO.
+- A phase, worker, durable sub-goal, commit, or scheduled wake completing does not mean the parent TODO is complete. Mark the TODO `DONE` only after every required phase is `DONE` or explicitly approved `SKIPPED`, all required verification passes, and required Git integration is complete.
 
 ## Financial safety
 

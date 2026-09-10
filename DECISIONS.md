@@ -108,7 +108,7 @@ P2-07 is no longer blocked on topology choice and may implement/test a paired re
 
 ### DEC-008 — Governance V2 TODO Runner behavior
 
-Status: Active  
+Status: Partially superseded by DEC-023 for implementation scheduling/continuation
 Date: 2026-08-29
 
 Decision:
@@ -206,7 +206,7 @@ P1-13 is actionable. The implementation must be deterministic, retry/concurrency
 
 ### DEC-015 — Scheduled automation uses separate bootstrap, continuation, scanner, and scout boundaries
 
-Status: Active
+Status: Partially superseded by DEC-023 for implementation-runner scheduling/continuation
 Date: 2026-09-01
 
 Owner decision:
@@ -330,6 +330,27 @@ Owner decision:
 
 Impact:
 P2-41 is approved for implementation and may leave `REVIEW`. The first slice should establish semantic tokens and the shared Application/Admin kernel; Landing, Login, Upload, individual Admin surfaces, POS, and Customer Display migrate in bounded follow-up phases rather than through a repository-wide color replacement.
+
+### DEC-023 — Implementation TODOs use phased execution and one-time +5 minute continuation chains
+
+Status: Active
+Date: 2026-09-10
+
+Owner decision:
+- Executable implementation TODOs are split into coherent phases by real task size: Small = 1–3 phases, Medium = 4–7 phases, Large = 8–15 phases. Work requiring more than 15 meaningful phases should be split into smaller TODOs/epics rather than padded into a larger phase list.
+- Each required phase must carry resumable execution truth: scope, status, acceptance/exit criteria, verification, completion evidence, and next action/phase. A phase exists only when it has a coherent observable outcome.
+- The automated runner resumes a safe actionable `IN_PROGRESS` phase first; otherwise it selects the next safe required `OPEN` phase/TODO according to backlog priority and governance gates.
+- A parent TODO is `DONE` only when all required phases are `DONE` or explicitly approved `SKIPPED`, all required verification passes, and required Git integration is complete. A completed phase, durable sub-goal, worker, commit, or scheduled wake never means the parent TODO is complete by itself.
+- Glossy implementation automation uses a Native ChatGPT **one-time continuation chain**, not an hourly recurring implementation watchdog. Each wake should perform useful work continuously, targeting roughly 20–25 minutes when host/tool budget permits.
+- This resume/bootstrap behavior is intentionally scoped to the **Glossy Design ChatGPT Project / Glossy workspace only**. A fresh Glossy chat or Scheduled Task wake asked to continue/resume/inspect implementation must reconstruct execution truth from `AGENTS.md`, `PROJECT_RULES.md`, `DECISIONS.md`, workspace-root `TODO.md`, and `docs/SCHEDULE_CONTINUATION_CONTEXT.md`, then inspect active durable goals/leases/tracked tasks and Native ChatGPT Scheduled Task state before resuming work. The schedule-context file is diagnostic/operational context; content explicitly labeled as a proposal is not policy until promoted into active governance.
+- If safe actionable work remains when a wake must end, it must checkpoint exact phase/progress/nextAction/evidence and create exactly one fresh Native ChatGPT one-time successor for approximately +5 minutes before returning. Never leave unfinished actionable work with neither a real blocking worker nor a confirmed successor, and never maintain multiple live successors for the same chain.
+- A one-time Scheduled Task becoming `Complete` means that wake fired/completed only; it does not imply TODO/backlog completion when a successor was required.
+- The implementation chain stops only when no safe actionable `IN_PROGRESS`/`OPEN` phase remains, a genuine blocker/approval gate requires the owner, or the owner explicitly pauses it. `NO_ACTIONABLE_TASK` is invalid while an `IN_PROGRESS` TODO still has a required safe approved `OPEN`/`IN_PROGRESS` phase.
+- Do not use Windows Task Scheduler, cron, shell timers, DOM automation, or another local scheduler/queue as a substitute for Native ChatGPT Scheduled Tasks.
+- Project Scanner and Feature Scout remain separate Planner workflows under their existing policies/cadences and must not become a second implementation queue.
+
+Impact:
+DEC-023 supersedes the hourly/recurring implementation-runner scheduling portions of DEC-008 and DEC-015. Their backlog authority, collision avoidance, Scanner/Scout separation, and no-manufactured-work principles remain active. `PROJECT_RULES.md`, `AGENTS.md`, and `WORKFLOW.md` must use this phase-aware one-time continuation contract as the current implementation execution rule.
 
 ## Needs Decision
 
