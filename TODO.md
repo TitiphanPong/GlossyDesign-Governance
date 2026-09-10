@@ -1443,6 +1443,12 @@ Phase 3 implementation progress (2026-09-10):
 - Verification passed before integration: Frontend tests 247/247, ESLint zero-warning, sequential `npx tsc --noEmit`, UTF-8 validation, production Next.js build including TypeScript/static generation, `git diff --check`, and task-scoped diff review.
 - The verified feature was fast-forward merged and pushed to Frontend `main` at `5f1e976`. P2-41 remains `IN_PROGRESS`; next approved phase is Customer Display/Dark expression, followed by representative visual regression and final legacy-color cleanup.
 
+Phase 4 implementation progress (2026-09-10):
+- Customer Display/Dark expression now derives its Ink shell, high-contrast surfaces/text, Cyan focal highlight, restrained Violet decoration, and display-specific Mint/Green success treatment from the canonical Glossy token source while preserving pairing, sync, payment/order behavior, privacy boundaries, responsive layout, and Backend authority.
+- The final readability review corrected dark-display success labels/timeline/paid-state accents to use `--glossy-display-success` rather than the darker application status-success token.
+- Verification passed after the contrast correction: Frontend tests 252/252, ESLint zero-warning, sequential `npx tsc --noEmit`, UTF-8 validation, production Next.js build, and task-scoped diff review.
+- P2-41 remains `IN_PROGRESS`; after Phase 4 integration the next approved phase is representative visual regression, followed by final legacy-color cleanup and final verification/Git/Governance completion.
+
 Objective:
 - Audit the real Frontend source and define one long-term color architecture for the whole GlossyDesign product family while allowing distinct personalities for Brand/Marketing, Application/Admin, and Display/Dark surfaces.
 - The working design hypothesis is `Warm Editorial Print + Cyan` / `Modern Print Studio`: warm paper + ink + Glossy Cyan, with restrained CMYK-inspired accents rather than a generic blue SaaS palette or rainbow CMYK UI.
