@@ -1408,7 +1408,7 @@ Verification:
 
 ### P2-41 — Define a unified GlossyDesign Color System and Visual Color Direction
 
-Status: IN_PROGRESS  
+Status: DONE
 Area: Frontend / Design System / Theme / Shared UI / Public / POS / Customer Display  
 Risk: Medium / Broad visual blast radius  
 Owner: Frontend + Design  
@@ -1455,6 +1455,12 @@ Phase 5 implementation progress (2026-09-10):
 - The first authenticated responsive matrix exceeded Playwright's default 30-second test budget after completing its desktop captures; the visual regression itself was not failing. A test-only 90-second budget was applied and the complete focused matrix passed 3/3. Temporary isolated E2E port/dist-dir changes used to avoid active local test-process contention were restored and excluded from the commit.
 - Verification passed: focused Playwright color-system matrix 3/3, Frontend Node tests 252/252, ESLint zero-warning, sequential `npx tsc --noEmit`, UTF-8 validation, production Next.js build including TypeScript/static generation, and staged `git diff --check`. Representative evidence found no production semantic-token or horizontal-overflow defect requiring a Phase 5 UI repair.
 - The verified feature was fast-forward merged and pushed to Frontend `main` at `24f7e1c`. P2-41 remains `IN_PROGRESS`; next approved phase is final legacy-color cleanup followed by final broad verification and Git/Governance completion.
+
+Phase 6 final completion (2026-09-11):
+- Final legacy operational-color cleanup migrated 19 bounded Frontend files to the canonical Glossy semantic action/surface/text/border tokens without changing business, financial, payment, status, privacy, or Backend-authority behavior.
+- Final verification passed with Frontend Node tests 252/252, ESLint zero-warning (excluding only generated `.next-e2e-phase5*` artifacts), UTF-8 validation, sequential TypeScript `--noEmit`, representative Playwright color-system regression 3/3, production Next.js build, `git diff --check`, and task-scoped diff review.
+- Feature commit `0144466` was pushed, fast-forward merged to Frontend `main`, and `main` was pushed successfully. Generated `.next-e2e-phase5*` directories remained untracked and were not included in integration.
+- All six approved P2-41 phases are complete; P2-41 is `DONE`.
 
 Objective:
 - Audit the real Frontend source and define one long-term color architecture for the whole GlossyDesign product family while allowing distinct personalities for Brand/Marketing, Application/Admin, and Display/Dark surfaces.
