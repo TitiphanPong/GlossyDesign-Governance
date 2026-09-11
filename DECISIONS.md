@@ -333,8 +333,10 @@ P2-41 is approved for implementation and may leave `REVIEW`. The first slice sho
 
 ### DEC-023 — Implementation TODOs use phased execution and a redundant Native continuation runway
 
-Status: Active
+Status: Partially superseded by DEC-024 for implementation scheduling/continuation
 Date: 2026-09-10
+
+Scheduling note: the one-time runway/recovery-watchdog bullets in this decision are historical only; DEC-024 is normative for continuation transport.
 
 Owner decision:
 - Executable implementation TODOs are split into coherent phases by real task size: Small = 1–3 phases, Medium = 4–7 phases, Large = 8–15 phases. Work requiring more than 15 meaningful phases should be split into smaller TODOs/epics rather than padded into a larger phase list.
@@ -352,7 +354,28 @@ Owner decision:
 - Project Scanner and Feature Scout remain separate Planner workflows under their existing policies/cadences and must not become a second implementation queue.
 
 Impact:
-DEC-023 supersedes the hourly/recurring implementation-runner scheduling portions of DEC-008 and DEC-015. Their backlog authority, collision avoidance, Scanner/Scout separation, and no-manufactured-work principles remain active. `PROJECT_RULES.md`, `AGENTS.md`, and `WORKFLOW.md` must use this phase-aware rolling-runway continuation contract as the current implementation execution rule.
+DEC-023 supersedes the hourly/recurring implementation-runner scheduling portions of DEC-008 and DEC-015. Its phase-sizing, parent-TODO completion, backlog authority, collision avoidance, Scanner/Scout separation, and no-manufactured-work principles remain active. Its one-time rolling-runway scheduling model is superseded by DEC-024.
+
+### DEC-024 — Glossy implementation continuation uses one persistent Native recurring runner
+
+Status: Active
+Date: 2026-09-11
+
+Owner decision:
+- The repeated one-time successor/runway design is retired for Glossy implementation continuation because observed wakes repeatedly completed without leaving reliable future implementation coverage.
+- While safe actionable `IN_PROGRESS`/`OPEN` implementation work remains, maintain exactly one enabled Native ChatGPT **recurring implementation runner** for the Glossy workspace. The recurring host task is persistent across wakes and is not consumed when one firing completes.
+- The recurring runner is the project-level continuation transport across durable goals, phases, and TODO boundaries. Individual implementation durable goals must use `scheduledContinuation=off` so they do not create a second per-goal watchdog that competes with the project runner.
+- Every recurring wake reconstructs execution truth from `AGENTS.md`, `PROJECT_RULES.md`, `DECISIONS.md`, workspace-root `TODO.md`, `docs/SCHEDULE_CONTINUATION_CONTEXT.md`, active durable goals/leases/tracked tasks, and Git/WIP before deciding whether to mutate.
+- Before any project mutation, the wake must acquire/resume the relevant durable lnwjud lease. If another healthy worker owns the lease, the wake performs no implementation mutation and returns naturally; the persistent recurring task remains scheduled for the next firing.
+- One optional Native ChatGPT one-time bootstrap wake may be created when starting/restarting the system so useful work resumes sooner than the next recurring firing. A bootstrap wake is not a chain link and must never create a successor/runway.
+- A recurring Scheduled Task firing becoming complete for that occurrence never disables the recurring task and never implies TODO/backlog completion. Continuation health is `RUNNER_HEALTHY` when the recurring runner is enabled and future-scheduled; `CHAIN_BROKEN` means actionable work exists but that recurring runner is missing/disabled or host state is unverified.
+- At a true turn boundary, unfinished work is checkpointed with exact progress/next action/evidence and the durable lease is released. No successor creation is required because the same recurring runner remains scheduled.
+- When no safe actionable `IN_PROGRESS`/`OPEN` work remains, or only `BLOCKED`/`REVIEW`/Needs Decision/approval-gated work remains, the runner should perform a no-op; it may be disabled after host verification when the owner intentionally wants automation stopped.
+- Project Scanner and Feature Scout remain separate Planner workflows and must not become implementation workers.
+- Never use Windows Task Scheduler, cron, shell timers, DOM automation, or another local scheduler/queue as a substitute for Native ChatGPT Scheduled Tasks.
+
+Impact:
+DEC-024 supersedes only the one-time successor/runway and orchestration-only recovery-watchdog scheduling portions of DEC-023. DEC-023's phase sizing, resumable phase truth, parent TODO completion criteria, backlog selection, and collision-safety rules remain active. `PROJECT_RULES.md`, `AGENTS.md`, `WORKFLOW.md`, `docs/SCHEDULE_CONTINUATION_CONTEXT.md`, and project-local scheduling skills must use this persistent recurring-runner contract.
 
 ## Needs Decision
 
